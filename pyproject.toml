@@ -1,0 +1,10 @@
+# Tooling configuration only (this repo is not an installable package).
+# The import root is the repository root: everything imports as `src.*` / `backend.*`.
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
