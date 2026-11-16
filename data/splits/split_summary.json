@@ -1,0 +1,362 @@
+[
+  {
+    "language_id": "L1",
+    "split": "train",
+    "rows": 3532,
+    "positives": 1766,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L1",
+    "split": "val",
+    "rows": 759,
+    "positives": 380,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.501
+  },
+  {
+    "language_id": "L1",
+    "split": "test",
+    "rows": 756,
+    "positives": 378,
+    "min_len": 3,
+    "max_len": 20,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L1",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L2",
+    "split": "train",
+    "rows": 3533,
+    "positives": 1407,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.398
+  },
+  {
+    "language_id": "L2",
+    "split": "test",
+    "rows": 757,
+    "positives": 302,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.399
+  },
+  {
+    "language_id": "L2",
+    "split": "val",
+    "rows": 757,
+    "positives": 302,
+    "min_len": 3,
+    "max_len": 20,
+    "positive_rate": 0.399
+  },
+  {
+    "language_id": "L2",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L3",
+    "split": "train",
+    "rows": 3533,
+    "positives": 1913,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.541
+  },
+  {
+    "language_id": "L3",
+    "split": "test",
+    "rows": 757,
+    "positives": 411,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.543
+  },
+  {
+    "language_id": "L3",
+    "split": "val",
+    "rows": 757,
+    "positives": 409,
+    "min_len": 2,
+    "max_len": 20,
+    "positive_rate": 0.54
+  },
+  {
+    "language_id": "L3",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L4",
+    "split": "train",
+    "rows": 3533,
+    "positives": 1528,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.432
+  },
+  {
+    "language_id": "L4",
+    "split": "val",
+    "rows": 757,
+    "positives": 327,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.432
+  },
+  {
+    "language_id": "L4",
+    "split": "test",
+    "rows": 757,
+    "positives": 327,
+    "min_len": 2,
+    "max_len": 20,
+    "positive_rate": 0.432
+  },
+  {
+    "language_id": "L4",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L5",
+    "split": "test",
+    "rows": 758,
+    "positives": 282,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.372
+  },
+  {
+    "language_id": "L5",
+    "split": "val",
+    "rows": 756,
+    "positives": 281,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.372
+  },
+  {
+    "language_id": "L5",
+    "split": "train",
+    "rows": 3533,
+    "positives": 1312,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.371
+  },
+  {
+    "language_id": "L5",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L6",
+    "split": "train",
+    "rows": 3533,
+    "positives": 1532,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.434
+  },
+  {
+    "language_id": "L6",
+    "split": "test",
+    "rows": 755,
+    "positives": 326,
+    "min_len": 2,
+    "max_len": 20,
+    "positive_rate": 0.432
+  },
+  {
+    "language_id": "L6",
+    "split": "val",
+    "rows": 759,
+    "positives": 330,
+    "min_len": 3,
+    "max_len": 20,
+    "positive_rate": 0.435
+  },
+  {
+    "language_id": "L6",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L7",
+    "split": "train",
+    "rows": 3533,
+    "positives": 1229,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.348
+  },
+  {
+    "language_id": "L7",
+    "split": "test",
+    "rows": 757,
+    "positives": 263,
+    "min_len": 2,
+    "max_len": 20,
+    "positive_rate": 0.347
+  },
+  {
+    "language_id": "L7",
+    "split": "val",
+    "rows": 757,
+    "positives": 263,
+    "min_len": 2,
+    "max_len": 20,
+    "positive_rate": 0.347
+  },
+  {
+    "language_id": "L7",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L8",
+    "split": "train",
+    "rows": 3534,
+    "positives": 1146,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.324
+  },
+  {
+    "language_id": "L8",
+    "split": "test",
+    "rows": 758,
+    "positives": 245,
+    "min_len": 3,
+    "max_len": 20,
+    "positive_rate": 0.323
+  },
+  {
+    "language_id": "L8",
+    "split": "val",
+    "rows": 755,
+    "positives": 245,
+    "min_len": 4,
+    "max_len": 20,
+    "positive_rate": 0.325
+  },
+  {
+    "language_id": "L8",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L9",
+    "split": "train",
+    "rows": 3533,
+    "positives": 1764,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.499
+  },
+  {
+    "language_id": "L9",
+    "split": "test",
+    "rows": 758,
+    "positives": 378,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.499
+  },
+  {
+    "language_id": "L9",
+    "split": "val",
+    "rows": 756,
+    "positives": 378,
+    "min_len": 2,
+    "max_len": 20,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L9",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  },
+  {
+    "language_id": "L10",
+    "split": "train",
+    "rows": 3532,
+    "positives": 1528,
+    "min_len": 0,
+    "max_len": 20,
+    "positive_rate": 0.433
+  },
+  {
+    "language_id": "L10",
+    "split": "test",
+    "rows": 758,
+    "positives": 327,
+    "min_len": 1,
+    "max_len": 20,
+    "positive_rate": 0.431
+  },
+  {
+    "language_id": "L10",
+    "split": "val",
+    "rows": 757,
+    "positives": 328,
+    "min_len": 3,
+    "max_len": 20,
+    "positive_rate": 0.433
+  },
+  {
+    "language_id": "L10",
+    "split": "long",
+    "rows": 2000,
+    "positives": 1000,
+    "min_len": 21,
+    "max_len": 40,
+    "positive_rate": 0.5
+  }
+]

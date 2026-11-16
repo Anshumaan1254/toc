@@ -94,3 +94,33 @@ def savefig(fig, name: str) -> Path:
     path = FIGURES_DIR / f"{name}.png"
     fig.savefig(path)
     return path
+
+
+def heatmap(ax, frame, cmap=None, vmin=None, vmax=None, fmt="{:.2f}", text_dark_below=0.6, annotate=True):
+    """Annotated heatmap of a DataFrame (rows x columns) on ``ax``; returns the image."""
+    import numpy as np
+
+    values = frame.to_numpy(dtype=float)
+    im = ax.imshow(values, cmap=cmap or SEQUENTIAL_CMAP, vmin=vmin, vmax=vmax, aspect="auto")
+    ax.set_xticks(range(frame.shape[1]), [str(c) for c in frame.columns])
+    ax.set_yticks(range(frame.shape[0]), [str(i) for i in frame.index])
+    ax.grid(False)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    if annotate:
+        lo = np.nanmin(values) if vmin is None else vmin
+        hi = np.nanmax(values) if vmax is None else vmax
+        span = (hi - lo) or 1.0
+        for i in range(values.shape[0]):
+            for j in range(values.shape[1]):
+                v = values[i, j]
+                if np.isnan(v):
+                    continue
+                norm = (v - lo) / span
+                dark_bg = norm > text_dark_below if cmap in (None, SEQUENTIAL_CMAP) else abs(norm - 0.5) > 0.3
+                ax.text(j, i, fmt.format(v), ha="center", va="center", fontsize=8, color="white" if dark_bg else INK)
+    return im
+
+
+def legend_below(ax, ncol=4, offset=-0.16):
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, offset), ncol=ncol)

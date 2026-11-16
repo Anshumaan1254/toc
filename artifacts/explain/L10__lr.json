@@ -1,0 +1,91 @@
+{
+  "language": "L10",
+  "pipeline": "lr",
+  "name": "Logistic Regression",
+  "type": "logistic_regression",
+  "intercept": -0.29031970264799434,
+  "nonzero": 87,
+  "top_coefficients": [
+    {
+      "feature": "count(a)%3=2",
+      "value": 0.14149318772847852
+    },
+    {
+      "feature": "len%3=1",
+      "value": -0.132734299748974
+    },
+    {
+      "feature": "count(a)%4=0",
+      "value": -0.12700793138698377
+    },
+    {
+      "feature": "count(b)%3=2",
+      "value": 0.11802187519703679
+    },
+    {
+      "feature": "max_run(a)",
+      "value": -0.10893287872493504
+    },
+    {
+      "feature": "count(b)%4=0",
+      "value": -0.1020370251069763
+    },
+    {
+      "feature": "ratio(b)",
+      "value": -0.09225800064003269
+    },
+    {
+      "feature": "len%4=3",
+      "value": 0.09096694884526059
+    },
+    {
+      "feature": "max_run(b)",
+      "value": 0.08875641089033723
+    },
+    {
+      "feature": "count(b)%4=1",
+      "value": 0.0877421976746646
+    },
+    {
+      "feature": "count(a)%3=0",
+      "value": -0.08695780221469411
+    },
+    {
+      "feature": "count(b)%3=0",
+      "value": -0.08684187677415137
+    },
+    {
+      "feature": "ratio(a)",
+      "value": 0.0827090528987483
+    },
+    {
+      "feature": "len%3=0",
+      "value": 0.0796562146521317
+    },
+    {
+      "feature": "len",
+      "value": 0.07596403115943368
+    },
+    {
+      "feature": "len%4=1",
+      "value": -0.07520057190839069
+    },
+    {
+      "feature": "count(a)%4=2",
+      "value": 0.06702312565902285
+    },
+    {
+      "feature": "ngram(aaaa)",
+      "value": 0.057414755870404094
+    },
+    {
+      "feature": "count(a)%4=1",
+      "value": 0.056728531069709424
+    },
+    {
+      "feature": "last[3]=none",
+      "value": 0.054924990240356526
+    }
+  ],
+  "note": "coefficients on standardized features; positive pushes towards ACCEPT"
+}

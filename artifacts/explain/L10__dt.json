@@ -1,0 +1,307 @@
+{
+  "language": "L10",
+  "pipeline": "dt",
+  "name": "Decision Tree",
+  "type": "decision_tree",
+  "depth": 14,
+  "nodes": 107,
+  "leaves": 54,
+  "top_importances": [
+    {
+      "feature": "ratio(b)",
+      "value": 0.33096004083345343
+    },
+    {
+      "feature": "ratio(a)",
+      "value": 0.21627794323686908
+    },
+    {
+      "feature": "ngram(bb)",
+      "value": 0.07301707532127458
+    },
+    {
+      "feature": "len%2=0",
+      "value": 0.06475152156224583
+    },
+    {
+      "feature": "len%2=1",
+      "value": 0.06296761249417113
+    },
+    {
+      "feature": "count(b)",
+      "value": 0.05780610074662103
+    },
+    {
+      "feature": "ngram(aa)",
+      "value": 0.055971877137444705
+    },
+    {
+      "feature": "count(a)",
+      "value": 0.05387934935162282
+    },
+    {
+      "feature": "len",
+      "value": 0.04245155588443998
+    },
+    {
+      "feature": "count(a)%3=0",
+      "value": 0.01560142942929262
+    },
+    {
+      "feature": "last[6]=none",
+      "value": 0.007555717077851934
+    },
+    {
+      "feature": "count(b)%4=2",
+      "value": 0.005041278216948297
+    },
+    {
+      "feature": "len%3=0",
+      "value": 0.004388025137822458
+    },
+    {
+      "feature": "ngram(aaa)",
+      "value": 0.0016365042659594491
+    },
+    {
+      "feature": "first[1]=a",
+      "value": 0.001476394349375777
+    },
+    {
+      "feature": "ngram(bbab)",
+      "value": 0.001411557900745523
+    },
+    {
+      "feature": "ngram(bab)",
+      "value": 0.0013266521623548164
+    },
+    {
+      "feature": "count(a)%4=1",
+      "value": 0.0012867989953766008
+    },
+    {
+      "feature": "ngram(bbb)",
+      "value": 0.0007841988337475134
+    },
+    {
+      "feature": "count(b)%3=2",
+      "value": 0.00047051930024850724
+    }
+  ],
+  "tree": {
+    "id": 0,
+    "samples": 3532,
+    "p_accept": 0.4326,
+    "prediction": 0,
+    "feature": "ratio(a)",
+    "threshold": 0.5131579041481018,
+    "left": {
+      "id": 1,
+      "samples": 2071,
+      "p_accept": 0.5109,
+      "prediction": 1,
+      "feature": "ratio(b)",
+      "threshold": 0.5131579041481018,
+      "left": {
+        "id": 2,
+        "samples": 549,
+        "p_accept": 1.0,
+        "prediction": 1,
+        "leaf": true
+      },
+      "right": {
+        "id": 3,
+        "samples": 1522,
+        "p_accept": 0.3344,
+        "prediction": 0,
+        "feature": "ratio(a)",
+        "threshold": 0.42481203377246857,
+        "left": {
+          "id": 4,
+          "samples": 1149,
+          "p_accept": 0.443,
+          "prediction": 0,
+          "feature": "len%2=0",
+          "threshold": 0.5,
+          "left": {
+            "id": 5,
+            "samples": 521,
+            "p_accept": 0.6833,
+            "prediction": 1,
+            "feature": "ratio(a)",
+            "threshold": 0.3582887798547745,
+            "left": {
+              "id": 6,
+              "samples": 247,
+              "p_accept": 0.4413,
+              "prediction": 0,
+              "feature": "count(b)",
+              "threshold": 6.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 21,
+              "samples": 274,
+              "p_accept": 0.9015,
+              "prediction": 1,
+              "feature": "count(b)",
+              "threshold": 11.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 26,
+            "samples": 628,
+            "p_accept": 0.2436,
+            "prediction": 0,
+            "feature": "ngram(bb)",
+            "threshold": 4.5,
+            "left": {
+              "id": 27,
+              "samples": 313,
+              "p_accept": 0.0,
+              "prediction": 0,
+              "leaf": true
+            },
+            "right": {
+              "id": 28,
+              "samples": 315,
+              "p_accept": 0.4857,
+              "prediction": 0,
+              "feature": "ratio(b)",
+              "threshold": 0.6464285552501678,
+              "truncated": true
+            }
+          }
+        },
+        "right": {
+          "id": 55,
+          "samples": 373,
+          "p_accept": 0.0,
+          "prediction": 0,
+          "leaf": true
+        }
+      }
+    },
+    "right": {
+      "id": 56,
+      "samples": 1461,
+      "p_accept": 0.3217,
+      "prediction": 0,
+      "feature": "ratio(b)",
+      "threshold": 0.42481203377246857,
+      "left": {
+        "id": 57,
+        "samples": 1092,
+        "p_accept": 0.4304,
+        "prediction": 0,
+        "feature": "len%2=1",
+        "threshold": 0.5,
+        "left": {
+          "id": 58,
+          "samples": 622,
+          "p_accept": 0.2379,
+          "prediction": 0,
+          "feature": "ngram(aa)",
+          "threshold": 4.5,
+          "left": {
+            "id": 59,
+            "samples": 314,
+            "p_accept": 0.0,
+            "prediction": 0,
+            "leaf": true
+          },
+          "right": {
+            "id": 60,
+            "samples": 308,
+            "p_accept": 0.4805,
+            "prediction": 0,
+            "feature": "ratio(a)",
+            "threshold": 0.6464285552501678,
+            "left": {
+              "id": 61,
+              "samples": 74,
+              "p_accept": 0.0,
+              "prediction": 0,
+              "leaf": true
+            },
+            "right": {
+              "id": 62,
+              "samples": 234,
+              "p_accept": 0.6325,
+              "prediction": 1,
+              "feature": "count(a)",
+              "threshold": 7.5,
+              "truncated": true
+            }
+          }
+        },
+        "right": {
+          "id": 83,
+          "samples": 470,
+          "p_accept": 0.6851,
+          "prediction": 1,
+          "feature": "ratio(b)",
+          "threshold": 0.3245614022016525,
+          "left": {
+            "id": 84,
+            "samples": 151,
+            "p_accept": 0.3642,
+            "prediction": 0,
+            "feature": "count(a)",
+            "threshold": 5.5,
+            "left": {
+              "id": 85,
+              "samples": 22,
+              "p_accept": 0.9545,
+              "prediction": 1,
+              "feature": "max_run(a)",
+              "threshold": 2.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 88,
+              "samples": 129,
+              "p_accept": 0.2636,
+              "prediction": 0,
+              "feature": "ngram(aa)",
+              "threshold": 7.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 97,
+            "samples": 319,
+            "p_accept": 0.837,
+            "prediction": 1,
+            "feature": "count(a)",
+            "threshold": 11.5,
+            "left": {
+              "id": 98,
+              "samples": 302,
+              "p_accept": 0.8841,
+              "prediction": 1,
+              "feature": "last[6]=none",
+              "threshold": 0.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 105,
+              "samples": 17,
+              "p_accept": 0.0,
+              "prediction": 0,
+              "leaf": true
+            }
+          }
+        }
+      },
+      "right": {
+        "id": 106,
+        "samples": 369,
+        "p_accept": 0.0,
+        "prediction": 0,
+        "leaf": true
+      }
+    }
+  }
+}

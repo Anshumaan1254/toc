@@ -1,0 +1,91 @@
+{
+  "language": "L7",
+  "pipeline": "stack",
+  "name": "Stacked ensemble",
+  "type": "stacking",
+  "meta_intercept": -4.468547443780387,
+  "meta_weights": [
+    {
+      "base_learner": "lr",
+      "weight": 2.627890964359852
+    },
+    {
+      "base_learner": "dt",
+      "weight": 2.879630150739475
+    },
+    {
+      "base_learner": "rf",
+      "weight": 2.856500796453583
+    }
+  ],
+  "base_learners": {
+    "lr": {
+      "type": "logistic_regression",
+      "top_coefficients": [
+        {
+          "feature": "suffix=abb",
+          "value": 2.870586938237147
+        },
+        {
+          "feature": "suffix=bb",
+          "value": 0.40805879026145525
+        }
+      ]
+    },
+    "dt": {
+      "type": "DecisionTreeClassifier",
+      "top_importances": [
+        {
+          "feature": "suffix=abb",
+          "value": 1.0
+        }
+      ]
+    },
+    "rf": {
+      "type": "RandomForestClassifier",
+      "top_importances": [
+        {
+          "feature": "suffix=abb",
+          "value": 0.2298043888090528
+        },
+        {
+          "feature": "suffix=bb",
+          "value": 0.15824285841168903
+        },
+        {
+          "feature": "last[3]=a",
+          "value": 0.08257538300322041
+        },
+        {
+          "feature": "last[3]=b",
+          "value": 0.07519089472714723
+        },
+        {
+          "feature": "last[2]=a",
+          "value": 0.06481015791262953
+        },
+        {
+          "feature": "last[2]=b",
+          "value": 0.04994940463613146
+        },
+        {
+          "feature": "last[1]=b",
+          "value": 0.04918467614231076
+        },
+        {
+          "feature": "suffix=bbb",
+          "value": 0.046200015719543526
+        },
+        {
+          "feature": "last[1]=a",
+          "value": 0.03807732907920009
+        },
+        {
+          "feature": "suffix=ab",
+          "value": 0.03370577146705404
+        }
+      ]
+    }
+  },
+  "note": "the meta-learner combines each base learner's P(accept), learned on out-of-fold predictions"
+}

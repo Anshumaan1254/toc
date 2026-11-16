@@ -1,0 +1,99 @@
+{
+  "language": "L8",
+  "pipeline": "stack",
+  "name": "Stacked ensemble",
+  "type": "stacking",
+  "meta_intercept": -4.549302724330859,
+  "meta_weights": [
+    {
+      "base_learner": "lr",
+      "weight": 2.488035853062429
+    },
+    {
+      "base_learner": "dt",
+      "weight": 3.0260871724097598
+    },
+    {
+      "base_learner": "rf",
+      "weight": 2.9583648824232385
+    }
+  ],
+  "base_learners": {
+    "lr": {
+      "type": "logistic_regression",
+      "top_coefficients": [
+        {
+          "feature": "len%4=0",
+          "value": 2.549348360500703
+        },
+        {
+          "feature": "first[1]=a",
+          "value": 0.9241840667202263
+        },
+        {
+          "feature": "first[1]=b",
+          "value": -0.8836811553406511
+        }
+      ]
+    },
+    "dt": {
+      "type": "DecisionTreeClassifier",
+      "top_importances": [
+        {
+          "feature": "len%4=0",
+          "value": 0.697853852596315
+        },
+        {
+          "feature": "first[1]=a",
+          "value": 0.302146147403685
+        }
+      ]
+    },
+    "rf": {
+      "type": "RandomForestClassifier",
+      "top_importances": [
+        {
+          "feature": "len%4=0",
+          "value": 0.269505070625619
+        },
+        {
+          "feature": "len",
+          "value": 0.07999187758886357
+        },
+        {
+          "feature": "first[1]=a",
+          "value": 0.07886220004499589
+        },
+        {
+          "feature": "len%2=0",
+          "value": 0.07748265695162056
+        },
+        {
+          "feature": "first[1]=b",
+          "value": 0.0725020568029704
+        },
+        {
+          "feature": "len%2=1",
+          "value": 0.07121583485309961
+        },
+        {
+          "feature": "len%4=2",
+          "value": 0.07121534079663307
+        },
+        {
+          "feature": "len%4=1",
+          "value": 0.03841222481185688
+        },
+        {
+          "feature": "prefix=bb",
+          "value": 0.02473842628774835
+        },
+        {
+          "feature": "len%4=3",
+          "value": 0.019887166742181137
+        }
+      ]
+    }
+  },
+  "note": "the meta-learner combines each base learner's P(accept), learned on out-of-fold predictions"
+}

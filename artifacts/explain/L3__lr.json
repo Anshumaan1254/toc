@@ -1,0 +1,35 @@
+{
+  "language": "L3",
+  "pipeline": "lr",
+  "name": "Logistic Regression",
+  "type": "logistic_regression",
+  "intercept": 1.5561520790955958,
+  "nonzero": 6,
+  "top_coefficients": [
+    {
+      "feature": "ngram(101)",
+      "value": 3.6950219248245464
+    },
+    {
+      "feature": "ngram(1011)",
+      "value": 0.5241818986240604
+    },
+    {
+      "feature": "ngram(1101)",
+      "value": 0.4406485491293278
+    },
+    {
+      "feature": "ngram(1010)",
+      "value": 0.17927956216151866
+    },
+    {
+      "feature": "ngram(0101)",
+      "value": 0.11809928834921399
+    },
+    {
+      "feature": "ngram(00)",
+      "value": -0.04055053964371076
+    }
+  ],
+  "note": "coefficients on standardized features; positive pushes towards ACCEPT"
+}

@@ -1,0 +1,55 @@
+{
+  "language": "L5",
+  "pipeline": "lr",
+  "name": "Logistic Regression",
+  "type": "logistic_regression",
+  "intercept": -1.9599415895371155,
+  "nonzero": 11,
+  "top_coefficients": [
+    {
+      "feature": "ngram(110)",
+      "value": -1.6220000532184888
+    },
+    {
+      "feature": "ngram(011)",
+      "value": -1.611681717798699
+    },
+    {
+      "feature": "max_run(1)",
+      "value": -1.0569718923641551
+    },
+    {
+      "feature": "suffix=11",
+      "value": -0.1699056698939544
+    },
+    {
+      "feature": "prefix=11",
+      "value": -0.15770796226730846
+    },
+    {
+      "feature": "ngram(010)",
+      "value": 0.08676092796032189
+    },
+    {
+      "feature": "ratio(1)",
+      "value": -0.07584460218412464
+    },
+    {
+      "feature": "ratio(0)",
+      "value": 0.075844602184124
+    },
+    {
+      "feature": "ngram(0011)",
+      "value": -0.03428841116344401
+    },
+    {
+      "feature": "ngram(0010)",
+      "value": 0.03009052873294333
+    },
+    {
+      "feature": "count(0)",
+      "value": 2.7104543137353896e-05
+    }
+  ],
+  "note": "coefficients on standardized features; positive pushes towards ACCEPT"
+}

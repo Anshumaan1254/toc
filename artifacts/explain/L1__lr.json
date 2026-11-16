@@ -1,0 +1,19 @@
+{
+  "language": "L1",
+  "pipeline": "lr",
+  "name": "Logistic Regression",
+  "type": "logistic_regression",
+  "intercept": -0.00012012840427963775,
+  "nonzero": 2,
+  "top_coefficients": [
+    {
+      "feature": "count(0)%2=0",
+      "value": 1.7021599676391557
+    },
+    {
+      "feature": "count(0)%2=1",
+      "value": -1.7021599676391557
+    }
+  ],
+  "note": "coefficients on standardized features; positive pushes towards ACCEPT"
+}

@@ -1,0 +1,87 @@
+{
+  "language": "L4",
+  "pipeline": "stack",
+  "name": "Stacked ensemble",
+  "type": "stacking",
+  "meta_intercept": -4.350475272422146,
+  "meta_weights": [
+    {
+      "base_learner": "lr",
+      "weight": 2.6748939399085803
+    },
+    {
+      "base_learner": "dt",
+      "weight": 2.9505690349117026
+    },
+    {
+      "base_learner": "rf",
+      "weight": 2.8383647814306725
+    }
+  ],
+  "base_learners": {
+    "lr": {
+      "type": "logistic_regression",
+      "top_coefficients": [
+        {
+          "feature": "count(1)%3=0",
+          "value": 3.2581609616917535
+        }
+      ]
+    },
+    "dt": {
+      "type": "DecisionTreeClassifier",
+      "top_importances": [
+        {
+          "feature": "count(1)%3=0",
+          "value": 1.0
+        }
+      ]
+    },
+    "rf": {
+      "type": "RandomForestClassifier",
+      "top_importances": [
+        {
+          "feature": "count(1)%3=0",
+          "value": 0.34323669779643096
+        },
+        {
+          "feature": "count(1)%3=1",
+          "value": 0.1288960339682042
+        },
+        {
+          "feature": "count(1)%3=2",
+          "value": 0.11411772454146589
+        },
+        {
+          "feature": "count(1)",
+          "value": 0.08000286919599794
+        },
+        {
+          "feature": "count(1)%4=2",
+          "value": 0.0271338541325585
+        },
+        {
+          "feature": "ratio(0)",
+          "value": 0.026660003497419194
+        },
+        {
+          "feature": "count(1)%4=3",
+          "value": 0.025990590263681973
+        },
+        {
+          "feature": "ngram(11)",
+          "value": 0.023978946678862217
+        },
+        {
+          "feature": "ratio(1)",
+          "value": 0.022017549387828742
+        },
+        {
+          "feature": "count(1)%4=1",
+          "value": 0.019603131582845813
+        }
+      ]
+    }
+  },
+  "note": "the meta-learner combines each base learner's P(accept), learned on out-of-fold predictions"
+}

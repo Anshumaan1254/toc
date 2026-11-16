@@ -1,0 +1,23 @@
+{
+  "language": "L8",
+  "pipeline": "lr",
+  "name": "Logistic Regression",
+  "type": "logistic_regression",
+  "intercept": -2.043679721400878,
+  "nonzero": 3,
+  "top_coefficients": [
+    {
+      "feature": "len%4=0",
+      "value": 2.549348360500703
+    },
+    {
+      "feature": "first[1]=a",
+      "value": 0.9241840667202263
+    },
+    {
+      "feature": "first[1]=b",
+      "value": -0.8836811553406511
+    }
+  ],
+  "note": "coefficients on standardized features; positive pushes towards ACCEPT"
+}

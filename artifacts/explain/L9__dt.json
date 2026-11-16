@@ -1,0 +1,37 @@
+{
+  "language": "L9",
+  "pipeline": "dt",
+  "name": "Decision Tree",
+  "type": "decision_tree",
+  "depth": 1,
+  "nodes": 3,
+  "leaves": 2,
+  "top_importances": [
+    {
+      "feature": "last[3]=1",
+      "value": 1.0
+    }
+  ],
+  "tree": {
+    "id": 0,
+    "samples": 3533,
+    "p_accept": 0.4993,
+    "prediction": 0,
+    "feature": "last[3]=1",
+    "threshold": 0.5,
+    "left": {
+      "id": 1,
+      "samples": 1769,
+      "p_accept": 0.0,
+      "prediction": 0,
+      "leaf": true
+    },
+    "right": {
+      "id": 2,
+      "samples": 1764,
+      "p_accept": 1.0,
+      "prediction": 1,
+      "leaf": true
+    }
+  }
+}

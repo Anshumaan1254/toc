@@ -1,0 +1,107 @@
+{
+  "language": "L3",
+  "pipeline": "stack",
+  "name": "Stacked ensemble",
+  "type": "stacking",
+  "meta_intercept": -4.241696068919525,
+  "meta_weights": [
+    {
+      "base_learner": "lr",
+      "weight": 2.401983972394225
+    },
+    {
+      "base_learner": "dt",
+      "weight": 3.1844068965988237
+    },
+    {
+      "base_learner": "rf",
+      "weight": 3.0596919323847125
+    }
+  ],
+  "base_learners": {
+    "lr": {
+      "type": "logistic_regression",
+      "top_coefficients": [
+        {
+          "feature": "ngram(101)",
+          "value": 3.6950219248245464
+        },
+        {
+          "feature": "ngram(1011)",
+          "value": 0.5241818986240604
+        },
+        {
+          "feature": "ngram(1101)",
+          "value": 0.4406485491293278
+        },
+        {
+          "feature": "ngram(1010)",
+          "value": 0.17927956216151866
+        },
+        {
+          "feature": "ngram(0101)",
+          "value": 0.11809928834921399
+        },
+        {
+          "feature": "ngram(00)",
+          "value": -0.04055053964371076
+        }
+      ]
+    },
+    "dt": {
+      "type": "DecisionTreeClassifier",
+      "top_importances": [
+        {
+          "feature": "ngram(101)",
+          "value": 1.0
+        }
+      ]
+    },
+    "rf": {
+      "type": "RandomForestClassifier",
+      "top_importances": [
+        {
+          "feature": "ngram(101)",
+          "value": 0.2330289120601249
+        },
+        {
+          "feature": "ngram(1011)",
+          "value": 0.13113577456694053
+        },
+        {
+          "feature": "ngram(1101)",
+          "value": 0.11815566035019985
+        },
+        {
+          "feature": "ngram(1010)",
+          "value": 0.10369223531713849
+        },
+        {
+          "feature": "ngram(0101)",
+          "value": 0.09958420325006577
+        },
+        {
+          "feature": "changes",
+          "value": 0.03057759232266451
+        },
+        {
+          "feature": "ngram(00)",
+          "value": 0.02349419924293105
+        },
+        {
+          "feature": "ngram(001)",
+          "value": 0.018502529981956697
+        },
+        {
+          "feature": "ngram(01)",
+          "value": 0.018490534450195033
+        },
+        {
+          "feature": "ngram(100)",
+          "value": 0.015651713161309713
+        }
+      ]
+    }
+  },
+  "note": "the meta-learner combines each base learner's P(accept), learned on out-of-fold predictions"
+}

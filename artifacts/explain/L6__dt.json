@@ -1,0 +1,568 @@
+{
+  "language": "L6",
+  "pipeline": "dt",
+  "name": "Decision Tree",
+  "type": "decision_tree",
+  "depth": 16,
+  "nodes": 599,
+  "leaves": 300,
+  "top_importances": [
+    {
+      "feature": "ngram(1010)",
+      "value": 0.11230052863358189
+    },
+    {
+      "feature": "count(1)%2=0",
+      "value": 0.10588482746803353
+    },
+    {
+      "feature": "ngram(101)",
+      "value": 0.0775315432179218
+    },
+    {
+      "feature": "ngram(0110)",
+      "value": 0.06055235247896344
+    },
+    {
+      "feature": "ngram(1001)",
+      "value": 0.047355587170105594
+    },
+    {
+      "feature": "changes",
+      "value": 0.04590575730278121
+    },
+    {
+      "feature": "ngram(0101)",
+      "value": 0.03544689943410403
+    },
+    {
+      "feature": "max_run(0)",
+      "value": 0.03503062176414261
+    },
+    {
+      "feature": "ngram(1000)",
+      "value": 0.033139451235682564
+    },
+    {
+      "feature": "ngram(010)",
+      "value": 0.026924957942049146
+    },
+    {
+      "feature": "max_run(1)",
+      "value": 0.02194636648523824
+    },
+    {
+      "feature": "ngram(0001)",
+      "value": 0.021441859091567723
+    },
+    {
+      "feature": "len",
+      "value": 0.02055440564094171
+    },
+    {
+      "feature": "ngram(011)",
+      "value": 0.017324731096020056
+    },
+    {
+      "feature": "ngram(0000)",
+      "value": 0.016943761226706756
+    },
+    {
+      "feature": "count(0)",
+      "value": 0.01602372600198154
+    },
+    {
+      "feature": "ngram(1110)",
+      "value": 0.01471419888355383
+    },
+    {
+      "feature": "ngram(1100)",
+      "value": 0.011556991722509445
+    },
+    {
+      "feature": "ngram(111)",
+      "value": 0.011236848774851035
+    },
+    {
+      "feature": "ngram(110)",
+      "value": 0.010323308696412556
+    }
+  ],
+  "tree": {
+    "id": 0,
+    "samples": 3533,
+    "p_accept": 0.4336,
+    "prediction": 0,
+    "feature": "count(1)%2=0",
+    "threshold": 0.5,
+    "left": {
+      "id": 1,
+      "samples": 1681,
+      "p_accept": 0.2867,
+      "prediction": 0,
+      "feature": "ngram(1010)",
+      "threshold": 0.5,
+      "left": {
+        "id": 2,
+        "samples": 954,
+        "p_accept": 0.1122,
+        "prediction": 0,
+        "feature": "changes",
+        "threshold": 4.5,
+        "left": {
+          "id": 3,
+          "samples": 553,
+          "p_accept": 0.0289,
+          "prediction": 0,
+          "feature": "suffix=01",
+          "threshold": 0.5,
+          "left": {
+            "id": 4,
+            "samples": 450,
+            "p_accept": 0.0067,
+            "prediction": 0,
+            "feature": "ngram(0111)",
+            "threshold": 1.5,
+            "left": {
+              "id": 5,
+              "samples": 426,
+              "p_accept": 0.0023,
+              "prediction": 0,
+              "feature": "ngram(0101)",
+              "threshold": 0.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 10,
+              "samples": 24,
+              "p_accept": 0.0833,
+              "prediction": 0,
+              "feature": "max_run(1)",
+              "threshold": 3.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 13,
+            "samples": 103,
+            "p_accept": 0.1262,
+            "prediction": 0,
+            "feature": "count(0)",
+            "threshold": 9.5,
+            "left": {
+              "id": 14,
+              "samples": 98,
+              "p_accept": 0.0918,
+              "prediction": 0,
+              "feature": "ngram(101)",
+              "threshold": 1.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 25,
+              "samples": 5,
+              "p_accept": 0.8,
+              "prediction": 1,
+              "leaf": true
+            }
+          }
+        },
+        "right": {
+          "id": 26,
+          "samples": 401,
+          "p_accept": 0.2269,
+          "prediction": 0,
+          "feature": "ngram(0110)",
+          "threshold": 0.5,
+          "left": {
+            "id": 27,
+            "samples": 188,
+            "p_accept": 0.367,
+            "prediction": 0,
+            "feature": "ngram(1001)",
+            "threshold": 0.5,
+            "left": {
+              "id": 28,
+              "samples": 77,
+              "p_accept": 0.7143,
+              "prediction": 1,
+              "feature": "len",
+              "threshold": 18.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 45,
+              "samples": 111,
+              "p_accept": 0.1261,
+              "prediction": 0,
+              "feature": "changes",
+              "threshold": 6.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 58,
+            "samples": 213,
+            "p_accept": 0.1033,
+            "prediction": 0,
+            "feature": "ngram(010)",
+            "threshold": 1.5,
+            "left": {
+              "id": 59,
+              "samples": 173,
+              "p_accept": 0.052,
+              "prediction": 0,
+              "feature": "max_run(1)",
+              "threshold": 4.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 76,
+              "samples": 40,
+              "p_accept": 0.325,
+              "prediction": 0,
+              "feature": "ngram(1001)",
+              "threshold": 1.5,
+              "truncated": true
+            }
+          }
+        }
+      },
+      "right": {
+        "id": 85,
+        "samples": 727,
+        "p_accept": 0.5158,
+        "prediction": 1,
+        "feature": "ngram(0101)",
+        "threshold": 0.5,
+        "left": {
+          "id": 86,
+          "samples": 183,
+          "p_accept": 0.2951,
+          "prediction": 0,
+          "feature": "ngram(0001)",
+          "threshold": 0.5,
+          "left": {
+            "id": 87,
+            "samples": 88,
+            "p_accept": 0.125,
+            "prediction": 0,
+            "feature": "ngram(101)",
+            "threshold": 1.5,
+            "left": {
+              "id": 88,
+              "samples": 62,
+              "p_accept": 0.0,
+              "prediction": 0,
+              "leaf": true
+            },
+            "right": {
+              "id": 89,
+              "samples": 26,
+              "p_accept": 0.4231,
+              "prediction": 0,
+              "feature": "ngram(1101)",
+              "threshold": 1.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 94,
+            "samples": 95,
+            "p_accept": 0.4526,
+            "prediction": 0,
+            "feature": "ngram(1110)",
+            "threshold": 0.5,
+            "left": {
+              "id": 95,
+              "samples": 40,
+              "p_accept": 0.275,
+              "prediction": 0,
+              "feature": "ngram(110)",
+              "threshold": 0.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 104,
+              "samples": 55,
+              "p_accept": 0.5818,
+              "prediction": 1,
+              "feature": "ngram(1111)",
+              "threshold": 0.5,
+              "truncated": true
+            }
+          }
+        },
+        "right": {
+          "id": 117,
+          "samples": 544,
+          "p_accept": 0.5901,
+          "prediction": 1,
+          "feature": "ngram(1011)",
+          "threshold": 1.5,
+          "left": {
+            "id": 118,
+            "samples": 455,
+            "p_accept": 0.6198,
+            "prediction": 1,
+            "feature": "ngram(1001)",
+            "threshold": 0.5,
+            "left": {
+              "id": 119,
+              "samples": 239,
+              "p_accept": 0.6987,
+              "prediction": 1,
+              "feature": "ngram(0110)",
+              "threshold": 0.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 166,
+              "samples": 216,
+              "p_accept": 0.5324,
+              "prediction": 1,
+              "feature": "ngram(011)",
+              "threshold": 0.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 215,
+            "samples": 89,
+            "p_accept": 0.4382,
+            "prediction": 0,
+            "feature": "count(0)%3=1",
+            "threshold": 0.5,
+            "left": {
+              "id": 216,
+              "samples": 67,
+              "p_accept": 0.5224,
+              "prediction": 1,
+              "feature": "ngram(1110)",
+              "threshold": 0.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 237,
+              "samples": 22,
+              "p_accept": 0.1818,
+              "prediction": 0,
+              "feature": "len",
+              "threshold": 16.5,
+              "truncated": true
+            }
+          }
+        }
+      }
+    },
+    "right": {
+      "id": 240,
+      "samples": 1852,
+      "p_accept": 0.567,
+      "prediction": 1,
+      "feature": "ngram(101)",
+      "threshold": 0.5,
+      "left": {
+        "id": 241,
+        "samples": 604,
+        "p_accept": 0.7798,
+        "prediction": 1,
+        "feature": "ngram(1000)",
+        "threshold": 0.5,
+        "left": {
+          "id": 242,
+          "samples": 217,
+          "p_accept": 1.0,
+          "prediction": 1,
+          "leaf": true
+        },
+        "right": {
+          "id": 243,
+          "samples": 387,
+          "p_accept": 0.6563,
+          "prediction": 1,
+          "feature": "max_run(0)",
+          "threshold": 3.5,
+          "left": {
+            "id": 244,
+            "samples": 126,
+            "p_accept": 0.4206,
+            "prediction": 0,
+            "feature": "ngram(0001)",
+            "threshold": 0.5,
+            "left": {
+              "id": 245,
+              "samples": 13,
+              "p_accept": 1.0,
+              "prediction": 1,
+              "leaf": true
+            },
+            "right": {
+              "id": 246,
+              "samples": 113,
+              "p_accept": 0.354,
+              "prediction": 0,
+              "feature": "ngram(1100)",
+              "threshold": 0.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 271,
+            "samples": 261,
+            "p_accept": 0.7701,
+            "prediction": 1,
+            "feature": "max_run(0)",
+            "threshold": 4.5,
+            "left": {
+              "id": 272,
+              "samples": 117,
+              "p_accept": 0.9231,
+              "prediction": 1,
+              "feature": "ngram(000)",
+              "threshold": 2.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 285,
+              "samples": 144,
+              "p_accept": 0.6458,
+              "prediction": 1,
+              "feature": "max_run(0)",
+              "threshold": 5.5,
+              "truncated": true
+            }
+          }
+        }
+      },
+      "right": {
+        "id": 316,
+        "samples": 1248,
+        "p_accept": 0.4639,
+        "prediction": 0,
+        "feature": "ngram(0110)",
+        "threshold": 0.5,
+        "left": {
+          "id": 317,
+          "samples": 602,
+          "p_accept": 0.3239,
+          "prediction": 0,
+          "feature": "ngram(1001)",
+          "threshold": 0.5,
+          "left": {
+            "id": 318,
+            "samples": 355,
+            "p_accept": 0.2254,
+            "prediction": 0,
+            "feature": "changes",
+            "threshold": 9.5,
+            "left": {
+              "id": 319,
+              "samples": 326,
+              "p_accept": 0.1779,
+              "prediction": 0,
+              "feature": "max_run(1)",
+              "threshold": 3.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 370,
+              "samples": 29,
+              "p_accept": 0.7586,
+              "prediction": 1,
+              "feature": "ngram(0101)",
+              "threshold": 3.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 377,
+            "samples": 247,
+            "p_accept": 0.4656,
+            "prediction": 0,
+            "feature": "ngram(0000)",
+            "threshold": 0.5,
+            "left": {
+              "id": 378,
+              "samples": 214,
+              "p_accept": 0.4299,
+              "prediction": 0,
+              "feature": "max_run(1)",
+              "threshold": 4.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 437,
+              "samples": 33,
+              "p_accept": 0.697,
+              "prediction": 1,
+              "feature": "ngram(010)",
+              "threshold": 2.5,
+              "truncated": true
+            }
+          }
+        },
+        "right": {
+          "id": 446,
+          "samples": 646,
+          "p_accept": 0.5944,
+          "prediction": 1,
+          "feature": "ngram(010)",
+          "threshold": 0.5,
+          "left": {
+            "id": 447,
+            "samples": 165,
+            "p_accept": 0.7939,
+            "prediction": 1,
+            "feature": "prefix=10",
+            "threshold": 0.5,
+            "left": {
+              "id": 448,
+              "samples": 113,
+              "p_accept": 0.8761,
+              "prediction": 1,
+              "feature": "ngram(1110)",
+              "threshold": 1.5,
+              "truncated": true
+            },
+            "right": {
+              "id": 461,
+              "samples": 52,
+              "p_accept": 0.6154,
+              "prediction": 1,
+              "feature": "len%2=1",
+              "threshold": 0.5,
+              "truncated": true
+            }
+          },
+          "right": {
+            "id": 472,
+            "samples": 481,
+            "p_accept": 0.526,
+            "prediction": 1,
+            "feature": "ngram(011)",
+            "threshold": 1.5,
+            "left": {
+              "id": 473,
+              "samples": 177,
+              "p_accept": 0.4068,
+              "prediction": 0,
+              "feature": "ratio(0)",
+              "threshold": 0.696153849363327,
+              "truncated": true
+            },
+            "right": {
+              "id": 520,
+              "samples": 304,
+              "p_accept": 0.5954,
+              "prediction": 1,
+              "feature": "ngram(0101)",
+              "threshold": 1.5,
+              "truncated": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "language": "L8",
+  "pipeline": "dt",
+  "name": "Decision Tree",
+  "type": "decision_tree",
+  "depth": 2,
+  "nodes": 5,
+  "leaves": 3,
+  "top_importances": [
+    {
+      "feature": "len%4=0",
+      "value": 0.697853852596315
+    },
+    {
+      "feature": "first[1]=a",
+      "value": 0.302146147403685
+    }
+  ],
+  "tree": {
+    "id": 0,
+    "samples": 3534,
+    "p_accept": 0.3243,
+    "prediction": 0,
+    "feature": "len%4=0",
+    "threshold": 0.5,
+    "left": {
+      "id": 1,
+      "samples": 2094,
+      "p_accept": 0.0,
+      "prediction": 0,
+      "leaf": true
+    },
+    "right": {
+      "id": 2,
+      "samples": 1440,
+      "p_accept": 0.7958,
+      "prediction": 1,
+      "feature": "first[1]=a",
+      "threshold": 0.5,
+      "left": {
+        "id": 3,
+        "samples": 294,
+        "p_accept": 0.0,
+        "prediction": 0,
+        "leaf": true
+      },
+      "right": {
+        "id": 4,
+        "samples": 1146,
+        "p_accept": 1.0,
+        "prediction": 1,
+        "leaf": true
+      }
+    }
+  }
+}
