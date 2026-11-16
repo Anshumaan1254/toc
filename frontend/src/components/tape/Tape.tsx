@@ -15,6 +15,7 @@ export function Tape({
   size = "md",
   className,
   label = "Input tape",
+  note,
 }: {
   input: string;
   head: number;
@@ -22,6 +23,8 @@ export function Tape({
   size?: "sm" | "md" | "lg";
   className?: string;
   label?: string;
+  /** A drafting annotation under one cell, e.g. { at: 20, text: "longer than any training string" }. */
+  note?: { at: number; text: string };
 }) {
   const reduce = useReducedMotion();
   const scroller = useRef<HTMLDivElement>(null);
@@ -40,8 +43,8 @@ export function Tape({
   const statusColor = status === "accepted" ? "var(--accept)" : status === "rejected" ? "var(--reject)" : "var(--lamp)";
 
   return (
-    <div className={cn("relative", className)} role="group" aria-label={`${label}: ${input === "" ? "empty string" : input}`}>
-      <div ref={scroller} className="no-scrollbar overflow-x-auto pb-1 pt-7" data-lenis-prevent>
+    <div className={cn("relative", className)} role="group" aria-label={`${label}: ${input === "" ? "empty string" : input}${note ? ` (${note.text})` : ""}`}>
+      <div ref={scroller} className={cn("no-scrollbar overflow-x-auto pt-7", note ? "pb-9" : "pb-1")} data-lenis-prevent>
         <div className="relative flex w-max gap-1 px-1">
           {cells.map((ch, i) => {
             const consumed = input !== "" && i < headIndex;
@@ -67,6 +70,12 @@ export function Tape({
           <div className="grid place-items-center font-mono text-muted/70" style={{ width: cell * 0.6, height: cell }} aria-hidden>
             ⊣
           </div>
+          {note && note.at >= 0 && note.at < cells.length && (
+            <div className="pointer-events-none absolute top-full flex flex-col items-center" style={{ left: note.at * (cell + 4) + 4, width: cell }} aria-hidden>
+              <div className="h-3 w-px bg-[color:var(--ink-2)]" />
+              <div className="t-annotation whitespace-nowrap text-ink-2">{note.text}</div>
+            </div>
+          )}
           {/* read head */}
           <motion.div
             className="pointer-events-none absolute -top-6 flex flex-col items-center"

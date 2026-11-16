@@ -424,3 +424,14 @@ export interface ModelExplanation {
   base_learners?: Record<string, { type: string; top_coefficients?: FeatureValue[]; top_importances?: FeatureValue[] }>;
   note?: string;
 }
+
+export interface DatasetReport {
+  config: { seed: number; buckets: { lo: number; hi: number; pool: "main" | "long"; size: number | null; label: string }[]; [k: string]: unknown };
+  total_rows: number;
+  languages: { language_id: string; rows: number; positives: number; negatives: number; positive_rate: number; min_len: number; max_len: number }[];
+  per_bucket: { language_id: string; split_hint: string; length_bucket: string; rows: number; positives: number; negatives: number; positive_rate: number; balanced_by_design: boolean }[];
+  strategies: Record<string, Record<string, number>>;
+  length_distribution: Record<string, Record<string, number>>;
+  duplicates_removed: { total: number; per_language: Record<string, number> };
+  shortfalls: string[];
+}

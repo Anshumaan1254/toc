@@ -5,6 +5,7 @@ import type {
   AutomatonRecord,
   ClassifyResult,
   CompareResult,
+  DatasetReport,
   Language,
   Learner,
   LearnClassifyResult,
@@ -65,6 +66,7 @@ export const api = {
   model: (language: string, pipeline: PipelineId) =>
     request<ModelDetail>(`/api/models/${encodeURIComponent(language)}/${encodeURIComponent(pipeline)}`),
   summary: () => request<Summary>("/api/summary"),
+  dataset: () => request<DatasetReport>("/api/dataset"),
   classify: (language: string, approach: ApproachId, string: string) =>
     request<ClassifyResult>("/api/classify", { method: "POST", body: JSON.stringify({ language, approach, string }) }),
   compare: (language: string, string: string) =>
@@ -107,6 +109,7 @@ export const useModel = (language: string | undefined, pipeline: PipelineId | un
   });
 
 export const useSummary = () => useQuery({ queryKey: ["summary"], queryFn: api.summary, staleTime: Infinity });
+export const useDataset = () => useQuery({ queryKey: ["dataset"], queryFn: api.dataset, staleTime: Infinity });
 
 export const useClassify = () =>
   useMutation({ mutationFn: (v: { language: string; approach: ApproachId; string: string }) => api.classify(v.language, v.approach, v.string) });

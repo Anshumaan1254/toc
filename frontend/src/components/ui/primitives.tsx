@@ -220,6 +220,7 @@ export function StringInput({
         <input
           ref={inputRef}
           id={id}
+          data-testid="string-input"
           value={value}
           autoFocus={autoFocus}
           maxLength={maxLength}
@@ -260,7 +261,7 @@ export function StringInput({
             Clear
           </button>
         </div>
-        <Button onClick={onSubmit} disabled={!ok} loading={loading} className="h-11">
+        <Button onClick={onSubmit} disabled={!ok} loading={loading} className="h-11" data-testid="string-submit">
           {submitLabel}
         </Button>
       </div>
@@ -274,26 +275,49 @@ export function StringInput({
 }
 
 // ------------------------------------------------------------------ Verdict stamp
-export function VerdictStamp({ accepted, className, size = "md" }: { accepted: boolean | null; className?: string; size?: "md" | "lg" }) {
+/**
+ * The rubber-stamp verdict. `accepted` drives the default ACCEPTED / REJECTED stamp; `label` + `tone`
+ * stamp anything else ("exact", "ground truth: rejected"). Stamps are the one place capitals are used.
+ */
+export function VerdictStamp({
+  accepted,
+  label,
+  tone,
+  className,
+  size = "md",
+}: {
+  accepted: boolean | null;
+  label?: string;
+  tone?: "accept" | "reject" | "ink";
+  className?: string;
+  size?: "sm" | "md" | "lg";
+}) {
   const reduce = useReducedMotion();
+  const visible = accepted !== null || !!label;
+  const text = label ?? (accepted ? "accepted" : "rejected");
+  const t = tone ?? (accepted ? "accept" : "reject");
   return (
     <div aria-live="polite" className={className}>
       <AnimatePresence mode="wait">
-        {accepted !== null && (
+        {visible && (
           <motion.div
-            key={String(accepted)}
-            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 1.7, rotate: -14 }}
-            animate={{ opacity: 1, scale: 1, rotate: -5 }}
-            exit={{ opacity: 0 }}
-            transition={reduce ? { duration: 0.1 } : { type: "spring", stiffness: 520, damping: 20 }}
+            key={`${text}-${t}`}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 1.6, rotate: -14 }}
+            animate={{ opacity: 1, scale: 1, rotate: -6 }}
+            exit={{ opacity: 0, transition: { duration: 0.12 } }}
+            transition={reduce ? { duration: 0.1 } : { type: "spring", stiffness: 520, damping: 24, mass: 0.9 }}
             className={cn(
-              "inline-block rounded-lg border-[3px] border-double px-4 py-1.5 font-mono font-semibold tracking-[0.18em]",
-              size === "lg" ? "text-2xl" : "text-lg",
-              accepted ? "border-[color:var(--accept)] text-accept" : "border-[color:var(--reject)] text-reject",
+              "inline-block rounded-lg border-[3px] border-double font-mono font-semibold uppercase tracking-[0.18em]",
+              size === "lg" ? "px-4 py-1.5 text-2xl" : size === "sm" ? "px-2.5 py-0.5 text-xs" : "px-4 py-1.5 text-lg",
+              t === "accept" && "border-[color:var(--accept)] text-accept",
+              t === "reject" && "border-[color:var(--reject)] text-reject",
+              t === "ink" && "border-[color:var(--ink-2)] text-ink-2",
             )}
             role="status"
+            data-testid="verdict"
+            data-verdict={accepted === null ? undefined : accepted ? "accepted" : "rejected"}
           >
-            {accepted ? "ACCEPTED" : "REJECTED"}
+            {text}
           </motion.div>
         )}
       </AnimatePresence>
@@ -305,7 +329,7 @@ export function VerdictStamp({ accepted, className, size = "md" }: { accepted: b
 export function Stat({ label, value, hint, className }: { label: ReactNode; value: ReactNode; hint?: ReactNode; className?: string }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <div className="font-display text-3xl font-semibold leading-none text-ink">{value}</div>
+      <div className="t-stat text-ink">{value}</div>
       <div className="mt-1.5 text-sm text-ink-2">{label}</div>
       {hint && <div className="mt-0.5 text-xs text-muted">{hint}</div>}
     </div>

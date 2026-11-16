@@ -3,6 +3,7 @@ import { NavLink, useLocation, useOutlet } from "react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BookOpen, Menu, Moon, Sun, X } from "lucide-react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useSummary } from "@/lib/api";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { useLenis } from "./SmoothScroll";
@@ -97,6 +98,7 @@ function Nav() {
 }
 
 function Footer() {
+  const { data: summary } = useSummary();
   return (
     <footer className="relative z-10 border-t border-line bg-bg">
       <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 text-sm text-ink-2 md:grid-cols-[1.4fr_1fr_1fr]">
@@ -106,8 +108,9 @@ function Footer() {
             <span className="font-display text-base font-semibold">Automata Lab</span>
           </div>
           <p className="max-w-md text-muted">
-            Problem 1: Intelligent Automata Learning and Regular Language Classification. Ten regular languages, 70,470 labelled strings, four
-            classifiers and the automata hiding inside them. Everything is seeded with 42 and reproducible from the notebooks.
+            Problem 1: Intelligent Automata Learning and Regular Language Classification. Ten regular languages,{" "}
+            {summary ? `${summary.meta.dataset_rows.toLocaleString("en-US")} labelled strings` : "a labelled dataset of strings"}, four classifiers and the
+            automata hiding inside them. Everything is seeded with {summary?.meta.seed ?? 42} and reproducible from the notebooks.
           </p>
         </div>
         <div className="space-y-2">

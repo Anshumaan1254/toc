@@ -118,3 +118,10 @@ def test_openapi_documents_every_endpoint() -> None:
     paths = client.get("/openapi.json").json()["paths"]
     for p in ["/api/languages", "/api/approaches", "/api/automata/{language}/{approach}", "/api/metrics", "/api/classify", "/api/compare", "/api/learn"]:
         assert p in paths
+
+
+def test_dataset_report_endpoint() -> None:
+    r = client.get("/api/dataset")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["total_rows"] == sum(l["rows"] for l in body["languages"]) and len(body["languages"]) == 10

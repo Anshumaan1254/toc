@@ -35,6 +35,15 @@
   --series-edsm: #6250d6;
   --series-truth: #33536f;
   --shadow: 0 1px 0 rgb(11 39 66 / 0.04), 0 12px 32px -18px rgb(11 39 66 / 0.35);
+
+  /* Motion tokens (docs/design/DESIGN_DIRECTION.md section 2). JS twins live in src/lib/motion.ts. */
+  --ease-draw: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --dur-micro: 140ms;
+  --dur-ui: 260ms;
+  --dur-reveal: 700ms;
+  --dur-stage: 1050ms;
 }
 
 .dark {
@@ -202,4 +211,77 @@ html.lenis body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ------------------------------------------------------------------ type scale (design direction section 3) */
+@utility t-display {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 8.4vw, 8.5rem);
+  line-height: 0.94;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+@utility t-page {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+@utility t-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.2vw, 3.75rem);
+  line-height: 1.04;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+@utility t-h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
+@utility t-lede {
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 48ch;
+}
+@utility t-caption {
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  color: var(--muted);
+}
+@utility t-annotation {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--muted);
+}
+@utility t-big {
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 11vw, 10rem);
+  line-height: 0.9;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+@utility t-stat {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A drafting-grid band whose lower edge fades out instead of ending on a hard rule. */
+.grid-paper-fade {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 80px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 80px), transparent);
 }

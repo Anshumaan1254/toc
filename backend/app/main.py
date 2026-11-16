@@ -123,6 +123,18 @@ def get_metrics() -> dict[str, Any]:
     return store.metrics
 
 
+@app.get("/api/dataset", tags=["results"])
+def get_dataset_report() -> dict[str, Any]:
+    """The dataset report from notebook 01: rows and class balance per language and length bucket, strategies."""
+    from src.data.io import read_json
+    from src.paths import DATA_DIR
+
+    path = DATA_DIR / "dataset_report.json"
+    if not path.exists():
+        raise MissingArtifact("data/dataset_report.json not found. Run notebook 01 first.")
+    return read_json(path)
+
+
 @app.get("/api/summary", tags=["results"])
 def get_summary() -> dict[str, Any]:
     """Headline numbers for the landing page (no per-grid-point tuning records)."""
