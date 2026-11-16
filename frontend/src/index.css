@@ -1,0 +1,205 @@
+@import "tailwindcss";
+
+/* Class-based dark mode: <html class="dark"> (the blueprint) vs light (the whiteprint). */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------ design tokens
+   Blueprint: automata are schematics, so the dark theme is a cyanotype (deep Prussian
+   blue, pale line-work, a drafting grid) and the light theme is a whiteprint (blue ink
+   on white paper).  The lamp (amber) is the machine's read head: it marks whatever the
+   machine is doing right now.  Data series use the validated categorical palette
+   (light steps on paper, dark steps on the navy panel - both pass the CVD checks). */
+:root {
+  color-scheme: light;
+  --bg: #f3f7fb;
+  --panel: #ffffff;
+  --panel-2: #e9f1f8;
+  --ink: #0b2742;
+  --ink-2: #33536f;
+  --muted: #5f7891;
+  --line: rgb(11 39 66 / 0.16);
+  --line-strong: rgb(11 39 66 / 0.32);
+  --grid: rgb(11 39 66 / 0.055);
+  --lamp: #b56a00;
+  --lamp-soft: rgb(181 106 0 / 0.14);
+  --accept: #0b8a64;
+  --accept-soft: rgb(11 138 100 / 0.12);
+  --reject: #c2412d;
+  --reject-soft: rgb(194 65 45 / 0.1);
+  --state-fill: #ffffff;
+  --series-lr: #2a78d6;
+  --series-dt: #eb6834;
+  --series-rf: #1baf7a;
+  --series-stack: #eda100;
+  --series-rpni: #e87ba4;
+  --series-edsm: #6250d6;
+  --series-truth: #33536f;
+  --shadow: 0 1px 0 rgb(11 39 66 / 0.04), 0 12px 32px -18px rgb(11 39 66 / 0.35);
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0a1a2f;
+  --panel: #0f2540;
+  --panel-2: #13304f;
+  --ink: #eaf3fb;
+  --ink-2: #a9c6e2;
+  --muted: #7896b3;
+  --line: rgb(156 195 230 / 0.2);
+  --line-strong: rgb(156 195 230 / 0.42);
+  --grid: rgb(156 195 230 / 0.07);
+  --lamp: #ffc857;
+  --lamp-soft: rgb(255 200 87 / 0.16);
+  --accept: #57e3b9;
+  --accept-soft: rgb(87 227 185 / 0.14);
+  --reject: #ff8b7b;
+  --reject-soft: rgb(255 139 123 / 0.14);
+  --state-fill: #0f2540;
+  --series-lr: #3987e5;
+  --series-dt: #d95926;
+  --series-rf: #199e70;
+  --series-stack: #c98500;
+  --series-rpni: #d55181;
+  --series-edsm: #9085e9;
+  --series-truth: #a9c6e2;
+  --shadow: 0 1px 0 rgb(0 0 0 / 0.2), 0 18px 40px -24px rgb(0 0 0 / 0.7);
+}
+
+@theme inline {
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-display: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-lamp: var(--lamp);
+  --color-lamp-soft: var(--lamp-soft);
+  --color-accept: var(--accept);
+  --color-accept-soft: var(--accept-soft);
+  --color-reject: var(--reject);
+  --color-reject-soft: var(--reject-soft);
+  --color-series-lr: var(--series-lr);
+  --color-series-dt: var(--series-dt);
+  --color-series-rf: var(--series-rf);
+  --color-series-stack: var(--series-stack);
+  --color-series-rpni: var(--series-rpni);
+  --color-series-edsm: var(--series-edsm);
+  --color-series-truth: var(--series-truth);
+
+  --animate-blink: blink 1.1s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* ------------------------------------------------------------------ base */
+html {
+  background: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--lamp-soft);
+  color: var(--ink);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 2px solid var(--lamp);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* The drafting grid behind blueprint panels (a fine 24px grid with a heavier 120px rule). */
+.grid-paper {
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:
+    24px 24px,
+    24px 24px,
+    120px 120px,
+    120px 120px;
+  background-position: -1px -1px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Hide scrollbars of horizontal rails while keeping them scrollable. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Lenis smooth scrolling */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

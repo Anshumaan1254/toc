@@ -1,0 +1,13 @@
+import { chromium } from "playwright-core";
+const url = process.argv[2] ?? "http://127.0.0.1:5173/";
+const browser = await chromium.launch({ channel: "msedge", headless: true });
+const page = await browser.newPage();
+const errors = [];
+page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+page.on("pageerror", (e) => errors.push(String(e)));
+await page.goto(url, { waitUntil: "networkidle" });
+await page.waitForTimeout(800);
+const smoke = await page.evaluate(() => window.__smoke);
+const text = await page.textContent("h1");
+console.log(JSON.stringify({ text, smoke, errors }));
+await browser.close();

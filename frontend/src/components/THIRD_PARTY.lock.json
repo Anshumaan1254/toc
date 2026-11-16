@@ -1,0 +1,414 @@
+[
+  {
+    "vendor": "reactbits",
+    "name": "Threads",
+    "url": "https://reactbits.dev/r/Threads-TS-TW.json",
+    "files": [
+      "Threads.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "DotGrid",
+    "url": "https://reactbits.dev/r/DotGrid-TS-TW.json",
+    "files": [
+      "DotGrid.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "LetterGlitch",
+    "url": "https://reactbits.dev/r/LetterGlitch-TS-TW.json",
+    "files": [
+      "LetterGlitch.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "Squares",
+    "url": "https://reactbits.dev/r/Squares-TS-TW.json",
+    "error": "Error: HTTP 404"
+  },
+  {
+    "vendor": "reactbits",
+    "name": "Aurora",
+    "url": "https://reactbits.dev/r/Aurora-TS-TW.json",
+    "files": [
+      "Aurora.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "RippleGrid",
+    "url": "https://reactbits.dev/r/RippleGrid-TS-TW.json",
+    "files": [
+      "RippleGrid.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "LightRays",
+    "url": "https://reactbits.dev/r/LightRays-TS-TW.json",
+    "files": [
+      "LightRays.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "SplitText",
+    "url": "https://reactbits.dev/r/SplitText-TS-TW.json",
+    "files": [
+      "SplitText.tsx"
+    ],
+    "dependencies": [
+      "gsap@^3.13.0",
+      "@gsap/react@^2.1.2"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "BlurText",
+    "url": "https://reactbits.dev/r/BlurText-TS-TW.json",
+    "files": [
+      "BlurText.tsx"
+    ],
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "DecryptedText",
+    "url": "https://reactbits.dev/r/DecryptedText-TS-TW.json",
+    "files": [
+      "DecryptedText.tsx"
+    ],
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "ScrollReveal",
+    "url": "https://reactbits.dev/r/ScrollReveal-TS-TW.json",
+    "files": [
+      "ScrollReveal.tsx"
+    ],
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "CountUp",
+    "url": "https://reactbits.dev/r/CountUp-TS-TW.json",
+    "files": [
+      "CountUp.tsx"
+    ],
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "ShinyText",
+    "url": "https://reactbits.dev/r/ShinyText-TS-TW.json",
+    "files": [
+      "ShinyText.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "RotatingText",
+    "url": "https://reactbits.dev/r/RotatingText-TS-TW.json",
+    "files": [
+      "RotatingText.tsx"
+    ],
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "TextType",
+    "url": "https://reactbits.dev/r/TextType-TS-TW.json",
+    "files": [
+      "TextType.tsx"
+    ],
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "SpotlightCard",
+    "url": "https://reactbits.dev/r/SpotlightCard-TS-TW.json",
+    "files": [
+      "SpotlightCard.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "Magnet",
+    "url": "https://reactbits.dev/r/Magnet-TS-TW.json",
+    "files": [
+      "Magnet.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "ClickSpark",
+    "url": "https://reactbits.dev/r/ClickSpark-TS-TW.json",
+    "files": [
+      "ClickSpark.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "reactbits",
+    "name": "StarBorder",
+    "url": "https://reactbits.dev/r/StarBorder-TS-TW.json",
+    "files": [
+      "StarBorder.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "animated-beam",
+    "url": "https://magicui.design/r/animated-beam.json",
+    "files": [
+      "animated-beam.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "number-ticker",
+    "url": "https://magicui.design/r/number-ticker.json",
+    "files": [
+      "number-ticker.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "border-beam",
+    "url": "https://magicui.design/r/border-beam.json",
+    "files": [
+      "border-beam.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "marquee",
+    "url": "https://magicui.design/r/marquee.json",
+    "files": [
+      "marquee.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "scroll-progress",
+    "url": "https://magicui.design/r/scroll-progress.json",
+    "files": [
+      "scroll-progress.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "shimmer-button",
+    "url": "https://magicui.design/r/shimmer-button.json",
+    "files": [
+      "shimmer-button.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "confetti",
+    "url": "https://magicui.design/r/confetti.json",
+    "files": [
+      "confetti.tsx"
+    ],
+    "dependencies": [
+      "canvas-confetti",
+      "@types/canvas-confetti"
+    ],
+    "registryDependencies": [
+      "button"
+    ]
+  },
+  {
+    "vendor": "magicui",
+    "name": "hyper-text",
+    "url": "https://magicui.design/r/hyper-text.json",
+    "files": [
+      "hyper-text.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "magicui",
+    "name": "animated-grid-pattern",
+    "url": "https://magicui.design/r/animated-grid-pattern.json",
+    "files": [
+      "animated-grid-pattern.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "sticky-scroll-reveal",
+    "url": "https://ui.aceternity.com/registry/sticky-scroll-reveal.json",
+    "files": [
+      "sticky-scroll-reveal.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "tracing-beam",
+    "url": "https://ui.aceternity.com/registry/tracing-beam.json",
+    "files": [
+      "tracing-beam.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "spotlight-new",
+    "url": "https://ui.aceternity.com/registry/spotlight-new.json",
+    "files": [
+      "spotlight-new.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "container-scroll-animation",
+    "url": "https://ui.aceternity.com/registry/container-scroll-animation.json",
+    "files": [
+      "container-scroll-animation.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "background-beams",
+    "url": "https://ui.aceternity.com/registry/background-beams.json",
+    "files": [
+      "background-beams.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "timeline",
+    "url": "https://ui.aceternity.com/registry/timeline.json",
+    "files": [
+      "timeline.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "text-generate-effect",
+    "url": "https://ui.aceternity.com/registry/text-generate-effect.json",
+    "files": [
+      "text-generate-effect.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "aceternity",
+    "name": "flip-words",
+    "url": "https://ui.aceternity.com/registry/flip-words.json",
+    "files": [
+      "flip-words.tsx"
+    ],
+    "dependencies": [
+      "motion"
+    ],
+    "registryDependencies": []
+  },
+  {
+    "vendor": "kokonutui",
+    "name": "background-paths",
+    "url": "https://kokonutui.com/r/background-paths.json",
+    "files": [
+      "background-paths.tsx"
+    ],
+    "dependencies": [],
+    "registryDependencies": []
+  }
+]
