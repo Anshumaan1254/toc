@@ -3,19 +3,19 @@
   "pipeline": "stack",
   "name": "Stacked ensemble",
   "type": "stacking",
-  "meta_intercept": -2.814408350594138,
+  "meta_intercept": -2.8144083505941375,
   "meta_weights": [
     {
       "base_learner": "lr",
-      "weight": 0.30206276284078504
+      "weight": 0.3020627628407865
     },
     {
       "base_learner": "dt",
-      "weight": 1.8612568016632158
+      "weight": 1.8612568016632163
     },
     {
       "base_learner": "rf",
-      "weight": 3.405845303566402
+      "weight": 3.405845303566399
     }
   ],
   "base_learners": {

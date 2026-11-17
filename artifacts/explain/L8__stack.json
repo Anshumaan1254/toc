@@ -11,11 +11,11 @@
     },
     {
       "base_learner": "dt",
-      "weight": 3.0260871724097598
+      "weight": 3.0260871724097593
     },
     {
       "base_learner": "rf",
-      "weight": 2.9583648824232385
+      "weight": 2.9583648824232394
     }
   ],
   "base_learners": {

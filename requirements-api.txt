@@ -1,0 +1,11 @@
+# Runtime dependencies of the API only (no notebooks, plotting or tests) - used by the Render deploy.
+# Same pins as requirements.txt: the saved models were pickled with scikit-learn 1.9.0.
+numpy==2.4.6
+pandas==3.0.3
+pyarrow==24.0.0
+scipy==1.17.1
+scikit-learn==1.9.0
+joblib==1.5.3
+fastapi==0.141.1
+uvicorn==0.52.4
+pydantic==2.13.4

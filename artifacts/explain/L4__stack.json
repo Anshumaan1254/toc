@@ -15,7 +15,7 @@
     },
     {
       "base_learner": "rf",
-      "weight": 2.8383647814306725
+      "weight": 2.838364781430672
     }
   ],
   "base_learners": {
