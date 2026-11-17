@@ -1,5 +1,6 @@
 import {
   forwardRef,
+  useEffect,
   useId,
   useRef,
   useState,
@@ -84,9 +85,41 @@ export interface TabItem {
   content: ReactNode;
   disabled?: boolean;
 }
-export function Tabs({ items, initial, className, label }: { items: TabItem[]; initial?: string; className?: string; label: string }) {
+export function Tabs({
+  items,
+  initial,
+  className,
+  label,
+  linkable = true,
+}: {
+  items: TabItem[];
+  initial?: string;
+  className?: string;
+  label: string;
+  /** Mirror the selected tab in the URL hash (#tab-id) so it can be linked to. */
+  linkable?: boolean;
+}) {
   const enabled = items.filter((t) => !t.disabled);
-  const [active, setActive] = useState(initial && enabled.some((t) => t.id === initial) ? initial : enabled[0]?.id);
+  const fromHash = () => {
+    if (!linkable || typeof window === "undefined") return undefined;
+    const h = decodeURIComponent(window.location.hash.slice(1));
+    return enabled.some((t) => t.id === h) ? h : undefined;
+  };
+  const [active, setActiveState] = useState(fromHash() ?? (initial && enabled.some((t) => t.id === initial) ? initial : enabled[0]?.id));
+  const setActive = (id: string) => {
+    setActiveState(id);
+    if (linkable) window.history.replaceState(window.history.state, "", `${window.location.pathname}${window.location.search}#${encodeURIComponent(id)}`);
+  };
+  useEffect(() => {
+    if (!linkable) return;
+    const onHash = () => {
+      const h = fromHash();
+      if (h) setActiveState(h);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linkable, items.map((t) => t.id).join("|")]);
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
   const base = useId();
   const onKey = (e: KeyboardEvent) => {

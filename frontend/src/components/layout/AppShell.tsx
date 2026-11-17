@@ -167,10 +167,12 @@ export function AppShell() {
           id="main"
           key={location.pathname}
           className="relative flex-1"
-          initial={reduce ? { opacity: 0 } : { opacity: 0, filter: "blur(6px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          exit={reduce ? { opacity: 0 } : { opacity: 0, filter: "blur(6px)" }}
-          transition={{ duration: 0.28 }}
+          // Opacity only: a CSS filter or transform left on <main> would become the containing block
+          // for every position:fixed descendant (it hid the story's chapter tape).
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: reduce ? 0.1 : 0.22 }}
         >
           {outlet}
         </motion.main>

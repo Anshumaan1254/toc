@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Automata Lab: quick guide to the website</title>
+<style>
+  @font-face { font-family: "Plex"; src: url("../../frontend/node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+  @font-face { font-family: "Plex"; src: url("../../frontend/node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+  @font-face { font-family: "PlexCond"; src: url("../../frontend/node_modules/@fontsource/ibm-plex-sans-condensed/files/ibm-plex-sans-condensed-latin-600-normal.woff2") format("woff2"); font-weight: 600; }
+  @font-face { font-family: "PlexMono"; src: url("../../frontend/node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  :root { --ink: #0b2742; --ink2: #33536f; --muted: #5f7891; --lamp: #b56a00; --line: rgba(11, 39, 66, 0.16); }
+  html { font-family: "Plex", "Segoe UI", sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; }
+  body { margin: 0; }
+  h1, h2, h3 { font-family: "PlexCond", "Plex", sans-serif; font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; }
+  h1 { font-size: 40pt; margin: 0 0 6pt; }
+  h2 { font-size: 20pt; margin: 0 0 8pt; padding-bottom: 6pt; border-bottom: 1px solid var(--line); break-after: avoid; }
+  h3 { font-size: 13pt; margin: 14pt 0 4pt; break-after: avoid; }
+  p, li { max-width: 72ch; }
+  p { margin: 0 0 7pt; }
+  ul { margin: 0 0 8pt; padding-left: 16pt; }
+  li { margin: 2pt 0; }
+  code { font-family: "PlexMono", monospace; font-size: 9pt; background: #eef4fa; padding: 0 3pt; border-radius: 3pt; }
+  .section { break-before: page; }
+  figure { margin: 8pt 0 12pt; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 6pt; display: block; }
+  figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 4pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 9pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  th, td { border-bottom: 1px solid var(--line); padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { color: var(--ink2); font-weight: 600; }
+  td.n { font-variant-numeric: tabular-nums; }
+  .note { border-left: 3px solid var(--lamp); padding: 4pt 0 4pt 10pt; color: var(--ink2); margin: 8pt 0; }
+  .cover { height: 255mm; display: flex; flex-direction: column; }
+  .cover .sub { font-size: 14pt; color: var(--ink2); max-width: 60ch; margin-bottom: 14pt; }
+  .cover .meta { margin-top: auto; font-size: 9.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8pt; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; }
+  .toc li { margin: 3pt 0; }
+  a { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <h1>Automata Lab</h1>
+  <div class="sub">A quick guide to the website of Problem 1: Intelligent Automata Learning and Regular Language Classification.</div>
+  <figure><img src="hero.png" alt="The story page hero" /><figcaption>The home page: a finite automaton (L7, strings ending in "abb") reads a string symbol by symbol and stamps its verdict.</figcaption></figure>
+  <div class="meta">17 November 2026 · github.com/Anshumaan1254/toc · Quick version: a fuller illustrated guide replaces this file when it is ready.</div>
+</div>
+
+<div class="section">
+  <h2>What the website is for</h2>
+  <p>The project asks a simple question: <strong>can a machine-learning model learn what a finite automaton knows?</strong> Ten regular languages (L1–L10) were defined exactly by hand-built DFAs. From them we generated 70,470 labelled strings, trained four classifiers on generic string features, and then used Angluin's L* algorithm to extract the DFA each classifier had actually learned. The website lets you see all of it: the true machines, the learned machines and the classifiers, and lets you test any string against every one of them.</p>
+  <h3>Pages</h3>
+  <table>
+    <tr><th>Page</th><th>Address</th><th>What you do there</th></tr>
+    <tr><td>Story</td><td><code>/</code></td><td>Scroll through the project as chapters: the live machine, the question, the objectives, the theory, the dataset, the results, and how a DFA is extracted from a model.</td></tr>
+    <tr><td>Explore</td><td><code>/explore</code></td><td>Pick one of the ten languages, then one of 13 approaches with live accuracy and size figures.</td></tr>
+    <tr><td>Detail</td><td><code>/explore/L7/dfa</code></td><td>One approach for one language: its machine or model, how it was built or learned, and a "Try it" panel that runs your string step by step.</td></tr>
+    <tr><td>Compare</td><td><code>/compare</code></td><td>Run one string through all 13 approaches side by side; disagreements with the ground truth are explained.</td></tr>
+    <tr><td>Learn</td><td><code>/learn</code></td><td>Type your own accepted and rejected examples and watch a DFA being learned from them live.</td></tr>
+    <tr><td>API docs</td><td><code>:8000/docs</code></td><td>The documented REST API behind the site.</td></tr>
+  </table>
+  <h3>How to read the screen</h3>
+  <ul>
+    <li><strong>Blueprint look.</strong> Automata are drawn like engineering schematics on a drafting grid. The dark theme is a cyanotype; the sun/moon button in the navigation switches to the light "whiteprint".</li>
+    <li><strong>Amber = the read head.</strong> Whatever the machine is doing right now (the current state, the transition being taken, the tape cell being read) is lit in amber.</li>
+    <li><strong>Mint = accepted, coral = rejected</strong>, always shown with the words "accepted"/"rejected" on a rubber-stamp verdict as well.</li>
+    <li><strong>State diagrams.</strong> An arrow from nowhere marks the start state; a double circle is an accepting state; a state every symbol loops back to is a trap; dashed edges are ε-moves (moves that read no symbol).</li>
+    <li><strong>Dotted underlines</strong> are glossary terms: hover or focus them for a one-sentence definition.</li>
+  </ul>
+  <figure><img src="hero-light.png" alt="The light theme" /><figcaption>The same page in the light whiteprint theme.</figcaption></figure>
+</div>
+
+<div class="section">
+  <h2>The story page</h2>
+  <p>The home page tells the project as a sequence of scroll chapters. A thin <strong>chapter tape</strong> under the navigation shows which chapter you are in; click a cell to jump there.</p>
+  <ul>
+    <li><strong>The machine.</strong> A real DFA (by default L7, strings ending in <code>abb</code>) reads sample strings on an input tape: the read head moves cell by cell, a token travels along each transition, and the verdict is stamped. Type your own string under the tape to run it immediately, or switch the language with the chips above the drawing.</li>
+    <li><strong>The question.</strong> What a regular language, a DFA and a classifier are, and why "learning a language" is hard for statistics-based models.</li>
+    <li><strong>Objectives.</strong> The five objectives of the problem statement: generate datasets; build, run and minimize DFAs; train ML classifiers; learn automata from examples; compare everything.</li>
+    <li><strong>Theory.</strong> The automata theory used: NFAs and ε-moves, subset construction, minimization and equivalence checking.</li>
+    <li><strong>Dataset.</strong> How the 70,470 strings were generated and why many negatives sit one edit away from a positive.</li>
+    <li><strong>Results.</strong> Counters, charts and the comparison of DFAs with ML pipelines (accuracy, size, speed, behaviour on longer strings).</li>
+    <li><strong>Inside the model.</strong> How L* asks a trained model thousands of questions and draws the automaton the model implements.</li>
+    <li><strong>Closing.</strong> The ways into the tools: explore, compare, learn.</li>
+  </ul>
+  <div class="note">Animations respect the operating system's "reduce motion" setting, and the page reflows to a single column on phones.</div>
+</div>
+
+<div class="section">
+  <h2>Explore: languages and approaches</h2>
+  <p>Explore is the index of everything in the project. First choose a <strong>language</strong>: each entry shows its alphabet, its regular expression and the size of its minimal DFA, and the chosen language's machine is drawn beside the list. Then choose one of <strong>13 approaches</strong>, grouped in three families:</p>
+  <table>
+    <tr><th>Family</th><th>Approaches</th><th>What they are</th></tr>
+    <tr><td>Ground truth</td><td>DFA, NFA, minimized DFA</td><td>Exact constructions, correct by proof: the hand-built DFA, an NFA (natural or Thompson's ε-NFA of the regex) and the DFA obtained by subset construction plus Hopcroft minimization.</td></tr>
+    <tr><td>Learned automata</td><td>L* from LR, DT, RF and the stack; RPNI; EDSM</td><td>DFAs extracted from a trained model with L*, or learned directly from the labelled training strings by state merging.</td></tr>
+    <tr><td>ML pipelines</td><td>Logistic Regression, Decision Tree, Random Forest, Stacked ensemble</td><td>Classifiers trained on 124 generic string features (counts, n-grams, positions, runs, residues).</td></tr>
+  </table>
+  <figure><img src="explore.png" alt="The explore page" /><figcaption>Explore: the three families of approaches and the language list.</figcaption></figure>
+</div>
+
+<div class="section">
+  <h2>Detail pages</h2>
+  <p>Every approach for every language has its own page. The header names the language and the approach, shows its key figures (states, test accuracy, accuracy on strings of length 21–40, fidelity for extracted DFAs) and says whether a learned DFA matches the ground truth. Two menus switch the language or the approach without leaving the page.</p>
+  <h3>Automata (DFA, minimized DFA, learned DFAs)</h3>
+  <ul>
+    <li><strong>Try it.</strong> Type a string over the language's alphabet (an empty input means the empty string ε) and run it: the tape head, the lit state and the travelling token move together, and the verdict is checked against the ground truth.</li>
+    <li><strong>Tables.</strong> The state table and the transition table of the machine.</li>
+    <li><strong>Minimization.</strong> For the minimized DFA, the subset-construction DFA before minimization, coloured round by round as Moore's algorithm splits states into blocks, and the machine after.</li>
+    <li><strong>Why it is minimal.</strong> The Myhill–Nerode table: for every pair of states, the shortest suffix that tells them apart.</li>
+    <li><strong>How it was learned.</strong> For L* DFAs: rounds, counterexamples, membership and equivalence queries, whether L* converged, and fidelity (agreement with the model) versus accuracy (agreement with the truth). For RPNI/EDSM: prefix-tree size, merges and promotions.</li>
+  </ul>
+  <figure><img src="dfa.png" alt="DFA detail" /><figcaption>The ground-truth DFA of L7 with its Try-it instrument.</figcaption></figure>
+  <h3>NFA</h3>
+  <p>An NFA can be in several states at once, so a run lights a <em>set</em> of states after each symbol. A step-by-step player replays the subset construction that turns the NFA into a DFA; for L9 a 4-state NFA becomes an 8-state DFA, the classic exponential blow-up.</p>
+  <div class="two">
+    <figure><img src="nfa.png" alt="NFA detail" /><figcaption>The NFA page for L9 (third symbol from the end is 1).</figcaption></figure>
+    <figure><img src="min.png" alt="Minimized DFA" /><figcaption>The minimized DFA of L8, with minimization before and after.</figcaption></figure>
+  </div>
+  <h3>ML pipelines</h3>
+  <p>A pipeline page shows the path from string to decision: the string becomes 124 numbers, the model turns them into a probability, and 50% is the threshold. It explains what the model looks at (coefficients, the decision tree, feature importances or the stack's weights), its metrics on validation, test and the long set, and the DFA that L* extracted from it. Try it shows the probability on a gauge with the model's reasons for that string.</p>
+  <figure><img src="ml.png" alt="ML pipeline detail" /><figcaption>The random forest for L6 (binary multiples of 3), the hardest language for every ML model.</figcaption></figure>
+</div>
+
+<div class="section">
+  <h2>Compare and Learn</h2>
+  <h3>Compare: one string, every machine</h3>
+  <p>Pick a language and a string; all 13 approaches answer side by side, grouped by family, with the ground truth first. Approaches that disagree with the ground truth are highlighted with the reason (for example, a string longer than anything the models were trained on). The address bar keeps the language and string (<code>/compare?lang=L6&amp;s=110</code>), so a comparison can be shared as a link.</p>
+  <figure><img src="compare.png" alt="Compare page" /><figcaption>A 24-symbol binary string for L6: longer than any training string, which is where the ML models start to fail.</figcaption></figure>
+  <h3>Learn: teach a machine your language</h3>
+  <p>Write strings the machine should accept and strings it should reject (or start from a preset), choose a learner (RPNI, EDSM, or an ML model followed by L*), and the site learns and minimizes a DFA from your examples. Then test new strings: the learned DFA runs them step by step and the ML models trained on the same examples give their verdicts beside it. Conflicting or one-sided examples get a clear message instead of an error.</p>
+  <figure><img src="learn.png" alt="Learn page" /><figcaption>The Learn workbench: your examples, the learner, the learned machine.</figcaption></figure>
+</div>
+
+<div class="section">
+  <h2>Results in one page</h2>
+  <table>
+    <tr><th>Pipeline</th><th>Test accuracy</th><th>Test precision</th><th>Test recall</th><th>Test F1</th><th>Accuracy on lengths 21–40</th></tr>
+    <tr><td>Logistic Regression</td><td class="n">0.921</td><td class="n">0.908</td><td class="n">0.904</td><td class="n">0.905</td><td class="n">0.906</td></tr>
+    <tr><td>Decision Tree</td><td class="n">0.972</td><td class="n">0.967</td><td class="n">0.968</td><td class="n">0.968</td><td class="n">0.911</td></tr>
+    <tr><td>Random Forest</td><td class="n">0.976</td><td class="n">0.972</td><td class="n">0.973</td><td class="n">0.973</td><td class="n">0.934</td></tr>
+    <tr><td>Stacked ensemble</td><td class="n">0.975</td><td class="n">0.972</td><td class="n">0.969</td><td class="n">0.970</td><td class="n">0.915</td></tr>
+  </table>
+  <p>Means over the ten languages. Dataset: 70,470 strings (train 35,329, validation 7,570, test 7,571, and a separate long set of 20,000 strings of length 21–40 never used for training).</p>
+  <ul>
+    <li><strong>Ground-truth automata are exact</strong> on every test and long string, with 2 to 8 states.</li>
+    <li><strong>L* extracted a DFA equivalent to the ground truth from 34 of 40 trained models</strong> (31 converged; 3 stopped at the 64-state budget).</li>
+    <li><strong>Learning from the examples alone:</strong> EDSM recovered all 10 languages exactly, RPNI 8 of 10.</li>
+    <li><strong>Where ML fails:</strong> L6 (binary multiples of 3) defeats all four pipelines, about 0.53 on long strings; L10 defeats the linear model, and the trees on long strings.</li>
+    <li><strong>Size and speed:</strong> a DFA needs about 8 transitions and under a microsecond per string; the random forests average about 17,800 tree nodes.</li>
+  </ul>
+  <h2 style="margin-top:16pt">Running and deploying</h2>
+  <ul>
+    <li><strong>Run locally:</strong> <code>D:\CondaEnvs\ai\python.exe run_all.py</code> starts the API (<code>http://127.0.0.1:8000</code>, documentation at <code>/docs</code>) and the website (<code>http://127.0.0.1:5173</code>). <code>--prod</code> serves both from one server; <code>--check</code> runs the tests, the build and an end-to-end browser test.</li>
+    <li><strong>Deploy:</strong> the website on Vercel (root directory <code>frontend</code>; <code>frontend/vercel.json</code> forwards <code>/api</code> and <code>/docs</code> to the API) and the Python API on Render with the <code>render.yaml</code> blueprint. scikit-learn and SciPy are too large for Vercel's Python functions, and the Learn page keeps sessions in the API's memory.</li>
+  </ul>
+</div>
+
+</body>
+</html>
