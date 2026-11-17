@@ -43,7 +43,7 @@ export function hashSeed(text: string): number {
 
 export const DIFFICULTY_LEVEL: Record<Language["difficulty"], number> = { easy: 1, medium: 2, hard: 3 };
 
-/** Display order inside each family. The L* row sits last so it lines up with the four pipelines below it. */
+/** Display order inside each family. The L* rows sit last, in the same order as the four pipelines below them. */
 export const FAMILY_IDS: Record<Family, ApproachId[]> = {
   truth: ["dfa", "nfa", "min_dfa"],
   learned: ["rpni", "edsm", "lstar_lr", "lstar_dt", "lstar_rf", "lstar_stack"],
@@ -51,26 +51,6 @@ export const FAMILY_IDS: Record<Family, ApproachId[]> = {
 };
 
 export const FAMILY_ORDER: Family[] = ["truth", "learned", "ml"];
-
-/** Tiles laid out side by side inside (identity left, instruments right); they span two columns. */
-export const WIDE_TILES = new Set<ApproachId>(["rpni", "edsm"]);
-
-/** Tiles that carry a small drawing of their automaton. */
-export const DIAGRAM_TILES = new Set<ApproachId>(["dfa", "nfa", "min_dfa", "rpni", "edsm"]);
-
-/** Grid columns per family: three ground-truth machines side by side, four-column rows elsewhere. */
-export const FAMILY_GRID: Record<Family, string> = {
-  truth: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-  learned: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-  ml: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4",
-};
-
-/** Column spans; kept in one place so the loading skeleton matches the real board. */
-export const TILE_SPAN: Partial<Record<ApproachId, string>> = {
-  dfa: "sm:col-span-2 lg:col-span-1",
-  rpni: "sm:col-span-2",
-  edsm: "sm:col-span-2",
-};
 
 export function orderFamily(items: Approach[], family: Family): Approach[] {
   const order = FAMILY_IDS[family];
@@ -80,23 +60,6 @@ export function orderFamily(items: Approach[], family: Family): Approach[] {
   };
   return items.filter((a) => a.family === family).sort((a, b) => rank(a.id) - rank(b.id));
 }
-
-/** Compact identifiers for the tiles. L*(LR) reads as "L* applied to the LR model". */
-export const CODE: Record<ApproachId, string> = {
-  dfa: "DFA",
-  nfa: "NFA",
-  min_dfa: "Min DFA",
-  lstar_lr: "L*(LR)",
-  lstar_dt: "L*(DT)",
-  lstar_rf: "L*(RF)",
-  lstar_stack: "L*(Stack)",
-  rpni: "RPNI",
-  edsm: "EDSM",
-  ml_lr: "LR",
-  ml_dt: "DT",
-  ml_rf: "RF",
-  ml_stack: "Stack",
-};
 
 /** The display name without the API's middle-dot form. */
 export function approachName(a: Approach): string {
@@ -111,7 +74,7 @@ export const SIZE_UNIT: Record<PipelineId, string> = {
   stack: "parameters and nodes",
 };
 
-/** The L* tile and the ML tile that belong to the same trained pipeline. */
+/** The L* row and the ML row that belong to the same trained pipeline. */
 export function pairOf(id: ApproachId): ApproachId | null {
   if (id.startsWith("lstar_")) return `ml_${id.slice(6)}` as ApproachId;
   if (id.startsWith("ml_")) return `lstar_${id.slice(3)}` as ApproachId;

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, type ReactNode } from "react";
+import { LightTable } from "@/components/graph/LightTable";
 import { errorMessage, useAutomaton } from "@/lib/api";
 import { ErrorState, Skeleton, Tabs, type TabItem } from "@/components/ui/primitives";
 import { PIPELINE_BY_ID } from "@/lib/meta";
@@ -12,17 +13,20 @@ import { disagreements, exampleStrings, plural, separationFromRows, separationTa
 import { WhyMinimal } from "./automata/NerodeTable";
 import { StateTable, TransitionTable } from "./automata/Tables";
 import { Chapter } from "./automata/ui";
-import { useRunner, useScrollTo } from "./automata/useRunner";
+import { useLinkedString, useRunner, useScrollTo } from "./automata/useRunner";
 
 export default function AutomatonDetail({ language, approach }: DetailProps) {
   const query = useAutomaton(language.id, approach.id);
   const truthQuery = useAutomaton(language.id, "dfa");
+  const minQuery = useAutomaton(language.id, "min_dfa");
   const runner = useRunner(language.id, approach.id);
   const stage = useScrollTo();
 
   const record = query.data;
   const dfa = record?.automaton.kind === "dfa" ? (record.automaton as DfaPayload) : null;
   const truth = truthQuery.data?.automaton.kind === "dfa" ? (truthQuery.data.automaton as DfaPayload) : null;
+  const minDfa = minQuery.data?.automaton.kind === "dfa" ? (minQuery.data.automaton as DfaPayload) : null;
+  const link = useLinkedString(runner, dfa?.alphabet);
   const notes = useMemo(() => (dfa ? stateNotes(dfa) : {}), [dfa]);
 
   const examples = useMemo<ExampleSet>(() => {
@@ -72,7 +76,9 @@ export default function AutomatonDetail({ language, approach }: DetailProps) {
   const modelName = approach.pipeline ? PIPELINE_BY_ID[approach.pipeline].name : "model";
   const metrics = record.metrics ?? null;
   const consistent = typeof record.stats?.consistent_with_training === "boolean" ? record.stats.consistent_with_training : null;
-  const demo = examples.accepted.find((s) => s.length >= 3) ?? examples.accepted[0];
+  const demo = link.linked !== null ? (link.valid ? link.linked : undefined) : (examples.accepted.find((s) => s.length >= 3) ?? examples.accepted[0]);
+  const converged = record.learning?.converged ?? metrics?.converged ?? null;
+  const stageNote = isLstar && converged === false && dfa.states.length > 20 ? `${dfa.states.length} states: this is a model that never settled on a rule.` : undefined;
 
   let describe: ((q: string) => ReactNode) | undefined;
   let describeLabel: string | undefined;
@@ -124,7 +130,7 @@ export default function AutomatonDetail({ language, approach }: DetailProps) {
   return (
     <div className="space-y-32">
       <div ref={stage.ref} className="scroll-mt-24">
-        <DfaStage dfa={dfa} notes={notes} runner={runner} examples={examples} family={approach.family} isTruth={approach.id === "dfa"} demo={demo} />
+        <DfaStage dfa={dfa} notes={notes} runner={runner} examples={examples} family={approach.family} isTruth={approach.id === "dfa"} demo={demo} note={stageNote} />
       </div>
 
       {learned && metrics && (
@@ -139,6 +145,16 @@ export default function AutomatonDetail({ language, approach }: DetailProps) {
           }
         >
           <MetricsPanel metrics={metrics} dfa={dfa} isLstar={isLstar} onRun={runAndShow} />
+          {minDfa && (
+            <div className="mt-16 space-y-4">
+              <h3 className="t-h3 text-ink">On the light table</h3>
+              <p className="max-w-3xl text-ink-2">
+                The minimal ground-truth DFA is drawn in ink; this machine is laid over it on tracing paper. If the two are the same machine, every
+                state and arrow registers.
+              </p>
+              <LightTable truth={minDfa} candidate={dfa} counterexample={metrics.counterexample_to_truth} candidateLabel={approach.name} />
+            </div>
+          )}
         </Chapter>
       )}
 

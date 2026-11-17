@@ -130,7 +130,7 @@ export function StringBench({ report, splitSizes }: { report: DatasetReport; spl
   return (
     <div className="relative mx-auto grid max-w-6xl grid-cols-1 gap-x-12 px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       {/* the sheet: sticky on every size; on phones it sits under the nav and the steps scroll below it */}
-      <div className="sticky top-[4.5rem] z-10 -mx-6 bg-bg/90 px-6 pb-3 pt-2 backdrop-blur-md lg:order-2 lg:top-24 lg:mx-0 lg:flex lg:h-[calc(100svh-8rem)] lg:items-center lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="sticky top-[6.5rem] z-10 -mx-6 bg-bg/90 px-6 pb-3 pt-2 backdrop-blur-md lg:order-2 lg:top-24 lg:mx-0 lg:flex lg:h-[calc(100svh-8rem)] lg:items-center lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <div ref={stageRef} className="grid-paper relative w-full overflow-hidden rounded-3xl border border-line bg-panel/80 p-4 shadow-[var(--shadow)] md:p-7">
           <SheetMarks />
           <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">

@@ -22,6 +22,10 @@ const SWEEP_QUERY = "(min-width: 1024px) and (min-height: 640px)";
 const PANEL_W = "min(74vw, 1040px)";
 const GAP = "4vw";
 const PAD = "max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem))";
+/** Empty holds at both ends of the pin: the first station sits still as the heading sticks, the last as it releases. */
+const HOLD = 0.08;
+/** Scroll progress of the pin (0..1) to progress of the sideways travel (0..1). */
+const travelOf = (p: number) => Math.min(1, Math.max(0, (p - HOLD) / (1 - 2 * HOLD)));
 
 interface Objective {
   id: string;
@@ -137,9 +141,7 @@ export function ObjectivesChapter() {
       const track = trackRef.current;
       if (!sweep || !section || !track) return;
       const distance = () => Math.max(0, track.scrollWidth - document.documentElement.clientWidth);
-      const tween = gsap.to(track, {
-        x: () => -distance(),
-        ease: "none",
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: "top top",
@@ -147,12 +149,16 @@ export function ObjectivesChapter() {
           scrub: 0.6,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
-            progress.set(self.progress);
-            setActive(Math.min(count - 1, Math.round(self.progress * (count - 1))));
+            const t = travelOf(self.progress);
+            progress.set(t);
+            setActive(Math.min(count - 1, Math.round(t * (count - 1))));
           },
         },
       });
-      triggerRef.current = tween.scrollTrigger ?? null;
+      tl.to({}, { duration: HOLD })
+        .to(track, { x: () => -distance(), ease: "none", duration: 1 - 2 * HOLD })
+        .to({}, { duration: HOLD });
+      triggerRef.current = tl.scrollTrigger ?? null;
       return () => {
         triggerRef.current = null;
         progress.set(0);
@@ -167,7 +173,7 @@ export function ObjectivesChapter() {
     (i: number, immediate = false) => {
       const st = triggerRef.current;
       if (!st) return;
-      const y = st.start + ((st.end - st.start) * i) / Math.max(1, count - 1);
+      const y = st.start + (st.end - st.start) * (HOLD + ((1 - 2 * HOLD) * i) / Math.max(1, count - 1));
       if (lenis) lenis.scrollTo(y, { immediate, duration: 1.2 });
       else window.scrollTo({ top: y, behavior: immediate ? "auto" : "smooth" });
     },
@@ -183,7 +189,7 @@ export function ObjectivesChapter() {
     if (Number.isFinite(i) && i !== active) goTo(i, true);
   };
 
-  const sectionHeight = `calc(100vh + ${count} * ${PANEL_W} + ${count - 1} * ${GAP} + 2 * ${PAD} - 100vw)`;
+  const sectionHeight = `calc(116vh + ${count} * ${PANEL_W} + ${count - 1} * ${GAP} + 2 * ${PAD} - 100vw)`;
 
   return (
     <section
@@ -196,7 +202,7 @@ export function ObjectivesChapter() {
       style={sweep ? { height: sectionHeight } : undefined}
     >
       <div className={cn(sweep && "sticky top-0 flex h-screen flex-col overflow-x-clip")}>
-        <div className={cn("mx-auto w-full max-w-6xl px-6", sweep ? "pt-24" : "")}>
+        <div className={cn("mx-auto w-full max-w-6xl px-6", sweep ? "pt-28" : "")}>
           <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-6">
             <div className="max-w-3xl">
               <h2 id="objectives-title" className="font-display text-[clamp(2.2rem,4vw,3.25rem)] font-semibold leading-[1.03] tracking-[-0.015em] text-ink">
@@ -253,7 +259,7 @@ export function ObjectivesChapter() {
   );
 }
 
-/** Five tape cells with the amber head gliding over them as the sweep advances. */
+/** Five tape cells with the amber head gliding over them as the sweep advances (amber only on the head). */
 function ProgressTape({
   labels,
   progress,
@@ -278,7 +284,7 @@ function ProgressTape({
               aria-current={i === active ? "step" : undefined}
               className={cn(
                 "h-10 w-full rounded-md border font-mono text-xs transition-colors",
-                i === active ? "border-[color:var(--lamp)] bg-lamp-soft text-ink" : i < active ? "border-line bg-panel-2/60 text-muted" : "border-line-strong bg-panel text-ink-2 hover:text-ink",
+                i === active ? "border-[color:var(--ink-2)] bg-panel text-ink" : i < active ? "border-line bg-panel-2/60 text-muted" : "border-line-strong bg-panel text-ink-2 hover:text-ink",
               )}
             >
               {l}

@@ -1,5 +1,5 @@
-import { useMemo, type ReactNode } from "react";
 import { ChartFrame } from "@/components/charts/Charts";
+import { DimensionLine } from "@/components/ui/DimensionLine";
 import { ErrorState, LoadingBlock } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { errorMessage, useDataset, useLanguages, useSummary } from "@/lib/api";
@@ -42,8 +42,6 @@ export function DatasetChapter() {
 }
 
 function Opener({ report, error, onRetry }: { report?: DatasetReport; error: string | null; onRetry: () => void }) {
-  const languages = useLanguages();
-  const alphabets = useMemo(() => [...new Set((languages.data ?? []).map((l) => `{${l.alphabet.join(", ")}}`))], [languages.data]);
   const perLanguage = report ? [...new Set(report.languages.map((l) => l.rows))] : [];
   const minLen = report ? Math.min(...report.languages.map((l) => l.min_len)) : 0;
   const maxLen = report ? Math.max(...report.languages.map((l) => l.max_len)) : 0;
@@ -60,39 +58,25 @@ function Opener({ report, error, onRetry }: { report?: DatasetReport; error: str
           <>
             <h2 id="dataset-title" className="font-display font-semibold text-ink">
               <span className="block text-[clamp(4.25rem,16.5vw,13.5rem)] leading-[0.86] tracking-[-0.035em]">
-                <Rolling value={report.total_rows} duration={2.2} />
+                <Rolling value={report.total_rows} duration={1.2} />
               </span>
               <span className="mt-4 block max-w-3xl text-[clamp(1.75rem,4.4vw,3.4rem)] leading-[1.02] tracking-[-0.015em] text-ink-2">
                 labelled strings, and every label proven
               </span>
             </h2>
+            <DimensionLine label={`labelled strings, lengths ${minLen} to ${maxLen}`} className="mt-6 max-w-3xl" />
+            <p className="t-annotation mt-3 text-ink-2">
+              {report.languages.length} languages ×{" "}
+              {perLanguage.length === 1 ? int(perLanguage[0]) : `${int(Math.min(...perLanguage))}+`} strings · {int(report.duplicates_removed.total)} duplicates
+              removed
+            </p>
             <Lead className="mt-8">
               Each string got its label from one place only: the language&apos;s ground-truth DFA. Every label was then checked again against the{" "}
               <Term k="nfa">NFA</Term>, the regular expression and a plain predicate written in code. All of them agreed on every string.
             </Lead>
-            <dl className="mt-14 grid grid-cols-2 gap-x-6 gap-y-9 border-t border-line pt-9 md:grid-cols-4">
-              <Fact value={<Rolling value={report.languages.length} delay={0.2} />} label="languages" hint={alphabets.length ? `over ${alphabets.join(" and ")}` : undefined} />
-              <Fact
-                value={perLanguage.length === 1 ? <Rolling value={perLanguage[0]} delay={0.3} /> : `${int(Math.min(...perLanguage))}+`}
-                label="strings per language"
-                hint="the same budget for every language"
-              />
-              <Fact value={<span className="inline-block h-[1.2em] leading-[1.2em]">{`${minLen}–${maxLen}`}</span>} label="symbols long" hint="from the empty string up" />
-              <Fact value={<Rolling value={report.duplicates_removed.total} delay={0.4} />} label="duplicates removed" hint="each string appears once per language" />
-            </dl>
           </>
         )}
       </div>
-    </div>
-  );
-}
-
-function Fact({ value, label, hint }: { value: ReactNode; label: string; hint?: string }) {
-  return (
-    <div className="flex min-w-0 flex-col border-l border-line-strong pl-4">
-      <dt className="order-2 mt-2 text-[15px] text-ink-2">{label}</dt>
-      <dd className="order-1 font-display text-[clamp(2.25rem,4.6vw,3.5rem)] font-semibold leading-none text-ink">{value}</dd>
-      {hint && <dd className="order-3 mt-0.5 text-xs text-muted">{hint}</dd>}
     </div>
   );
 }

@@ -44,7 +44,10 @@ export function LanguageList({
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    const i = index === -1 ? 0 : index;
+    // Step from the focused radio, not from `selectedId`: with rapid key presses the URL (and so the
+    // prop) has not caught up yet, but move() focuses the new row synchronously.
+    const focused = refs.current.findIndex((el) => el !== null && el === document.activeElement);
+    const i = focused !== -1 ? focused : index === -1 ? 0 : index;
     if (e.key === "ArrowDown" || e.key === "ArrowRight") move(i + 1);
     else if (e.key === "ArrowUp" || e.key === "ArrowLeft") move(i - 1);
     else if (e.key === "Home") move(0);
@@ -56,17 +59,17 @@ export function LanguageList({
   return (
     <div>
       {/* column heads for the instrument-style rows (desktop) */}
-      <div aria-hidden className="mb-1.5 hidden grid-cols-[2.9rem_minmax(0,1fr)_auto] items-end gap-x-3 px-3.5 text-xs text-muted lg:grid">
-        <span className="col-span-2">Language</span>
+      <div aria-hidden className="t-annotation hidden grid-cols-[2.9rem_minmax(0,1fr)_auto] items-end gap-x-3 border-b border-line px-3.5 pb-2 lg:grid">
+        <span className="col-span-2">language</span>
         <span className="flex items-center gap-3">
-          <span className="w-[43px] text-center">Symbols</span>
+          <span className="w-[43px] text-center">symbols</span>
           <span className="w-7 text-center" title="How hard it is for the ML pipelines">
             ML
           </span>
-          <span className="w-10 text-right">States</span>
+          <span className="w-10 text-right">states</span>
         </span>
       </div>
-    <div role="radiogroup" aria-labelledby={labelledBy} onKeyDown={onKeyDown} className="grid grid-cols-2 gap-1.5 sm:gap-2 lg:grid-cols-1 lg:gap-1">
+    <div role="radiogroup" aria-labelledby={labelledBy} onKeyDown={onKeyDown} className="grid grid-cols-2 gap-x-4 lg:grid-cols-1">
       {languages.map((l, i) => {
         const on = l.id === selectedId;
         const level = DIFFICULTY_LEVEL[l.difficulty] ?? 1;
@@ -86,29 +89,28 @@ export function LanguageList({
             onClick={() => onSelect(l.id)}
             onPointerEnter={() => onPeek(l.id)}
             onFocus={() => onPeek(l.id)}
-            style={{ borderRadius: 14 }}
             className={cn(
-              "group relative w-full px-3 py-2.5 text-left transition-colors sm:px-3.5 lg:py-3",
-              on ? "text-ink" : "text-ink-2 hover:bg-panel/55",
+              "group relative w-full border-b border-line px-3 py-2.5 text-left transition-colors sm:px-3.5 lg:py-3",
+              on ? "text-ink" : "text-ink-2 hover:bg-panel/40",
             )}
           >
             {on && (
               <motion.span
                 layoutId={`${base}-head`}
                 aria-hidden
-                className="absolute inset-0 rounded-[14px] border border-line-strong bg-panel shadow-[var(--shadow)]"
+                className="absolute inset-y-0 left-0 w-full"
                 transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 38 }}
               >
-                {/* the read head: an amber pointer on the selected row */}
+                {/* the read head: an amber pointer on the selected row, nothing else */}
                 <span className="absolute -left-[5px] top-1/2 hidden h-0 w-0 -translate-y-1/2 border-y-[6px] border-l-[7px] border-y-transparent border-l-[color:var(--lamp)] lg:block" />
                 <span className="absolute bottom-2.5 left-0 top-2.5 w-[3px] rounded-r-full bg-lamp" />
               </motion.span>
             )}
-            <span className="relative grid grid-cols-[2.4rem_minmax(0,1fr)] items-center gap-x-2 lg:grid-cols-[2.9rem_minmax(0,1fr)_auto] lg:gap-x-3">
-              <span className={cn("font-display text-lg font-semibold tabular lg:text-[22px]", on ? "text-lamp" : "text-ink-2")}>{l.id}</span>
+            <span className="relative grid grid-cols-[1.9rem_minmax(0,1fr)] items-center gap-x-2 lg:grid-cols-[2.9rem_minmax(0,1fr)_auto] lg:gap-x-3">
+              <span className={cn("font-mono text-[13px] tabular", on ? "font-medium text-ink" : "text-muted")}>{l.id}</span>
               <span className="min-w-0">
-                <span className="line-clamp-2 text-[14px] font-medium leading-snug text-ink lg:hidden">{l.name}</span>
-                <span className="hidden truncate text-[15px] font-medium text-ink lg:block" title={l.name}>
+                <span className={cn("line-clamp-2 font-display text-[15px] font-semibold leading-snug lg:hidden", on ? "text-ink" : "text-ink-2")}>{l.name}</span>
+                <span className={cn("hidden truncate font-display text-[19px] font-semibold leading-tight lg:block", on ? "text-ink" : "text-ink-2 group-hover:text-ink")} title={l.name}>
                   {l.name}
                 </span>
                 <span className="mt-0.5 hidden truncate font-mono text-[12px] text-muted sm:block" title={secondary}>

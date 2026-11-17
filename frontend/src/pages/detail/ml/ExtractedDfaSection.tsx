@@ -1,125 +1,26 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router";
-import { useInView } from "motion/react";
-import { Pause, Play, RotateCcw } from "lucide-react";
 import { errorMessage, useAutomaton } from "@/lib/api";
 import { runDfa } from "@/lib/automata";
 import { duration, int, pct, PIPELINE_BY_ID, showString } from "@/lib/meta";
 import type { ApproachId, ClassifyResult, DfaPayload, Language, ModelDetail } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { AutomatonGraph } from "@/components/graph/AutomatonGraph";
-import { layoutGraph, toGraphModel } from "@/components/graph/layout";
-import { useTracePlayer } from "@/components/graph/useTracePlayer";
+import { LightTable, matchDfas } from "@/components/graph/LightTable";
 import { Tape } from "@/components/tape/Tape";
-import { Badge, Button, ErrorState, Skeleton } from "@/components/ui/primitives";
+import { Badge, ErrorState, Skeleton } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { SectionHeading } from "./SectionHeading";
 
-/** Width at which the graph is drawn about 1.3x its natural size: small machines stay compact, big ones get the full width. */
-function useGraphMaxWidth(dfa: DfaPayload): number {
-  return useMemo(() => {
-    const n = dfa.states.length;
-    const r = n > 24 ? 17 : n > 12 ? 20 : 23;
-    return Math.round(layoutGraph(toGraphModel(dfa), { rankdir: "LR", r }).width * 1.3 + 40);
-  }, [dfa]);
-}
-
-/** The states visited while reading the string, one chip per step; readable even when the graph is too big to label. */
-function StateTrail({ dfa, steps, index }: { dfa: DfaPayload; steps: { from: string; to: string; symbol: string }[]; index: number }) {
-  const accepting = new Set(dfa.accepting);
-  const chip = (state: string, on: boolean, past: boolean) => (
-    <span
-      className={cn(
-        "inline-flex h-7 min-w-9 items-center justify-center rounded-full border px-2 font-mono text-xs transition-colors duration-200",
-        accepting.has(state) && "outline outline-1 outline-offset-2",
-        on ? "border-[color:var(--lamp)] bg-lamp-soft text-ink outline-[color:var(--lamp)]" : past ? "border-line-strong bg-panel text-ink-2 outline-line-strong" : "border-line bg-panel/40 text-muted outline-line",
-      )}
-    >
-      {state}
-    </span>
-  );
+/** One sentence on the reader's last string: what the extracted DFA says next to the model and the truth. */
+function LastRunLine({ dfa, run, languageId }: { dfa: DfaPayload; run: ClassifyResult; languageId: string }) {
+  const says = useMemo(() => runDfa(dfa, run.string).accepted, [dfa, run.string]);
+  const agree = says === run.accepted;
   return (
-    <div className="flex flex-wrap items-center gap-x-1 gap-y-2" aria-hidden>
-      {chip(dfa.start, index === -1, true)}
-      {steps.map((s, k) => (
-        <span key={k} className="inline-flex items-center gap-1">
-          <span className={cn("px-0.5 font-mono text-[11px]", k === index ? "text-lamp" : k < index ? "text-ink-2" : "text-muted/60")}>
-            <span className="align-[1px]">{s.symbol}</span>→
-          </span>
-          {chip(s.to, k === index, k < index)}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-function Replay({ dfa, run, languageId }: { dfa: DfaPayload; run: ClassifyResult; languageId: string }) {
-  const trace = useMemo(() => runDfa(dfa, run.string), [dfa, run.string]);
-  const player = useTracePlayer(trace.steps.length, { stepMs: trace.steps.length > 20 ? 200 : 460 });
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
-  const { restart, setStepMs } = player;
-  useEffect(() => setStepMs(trace.steps.length > 20 ? 200 : 460), [trace.steps.length, setStepMs]);
-  useEffect(() => {
-    if (inView) restart();
-  }, [inView, run.string, restart]);
-  const i = player.index;
-  const step = i >= 0 ? trace.steps[i] : null;
-  const current = step ? step.to : dfa.start;
-  const finished = player.done && !player.playing;
-  const agree = trace.accepted === run.accepted;
-  const maxWidth = useGraphMaxWidth(dfa);
-  return (
-    <div ref={ref} className="space-y-4">
-      <div className="mx-auto w-full" style={{ maxWidth }}>
-      <AutomatonGraph
-        automaton={dfa}
-        active={[current]}
-        activeEdge={step ? { from: step.from, to: step.to } : null}
-        tokenKey={i}
-        verdict={finished ? (trace.accepted ? "accept" : "reject") : null}
-        rankdir="LR"
-        maxHeight={440}
-        ariaLabel={`The extracted DFA: ${dfa.num_states} states, start ${dfa.start}, accepting ${dfa.accepting.join(", ") || "none"}.`}
-      />
-      </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Button size="sm" variant="outline" onClick={player.playing ? player.pause : player.done ? player.restart : player.play}>
-          {player.playing ? <Pause size={14} aria-hidden /> : player.done ? <RotateCcw size={14} aria-hidden /> : <Play size={14} aria-hidden />}
-          {player.playing ? "Pause" : player.done ? "Replay your string" : "Play"}
-        </Button>
-        <span className="text-sm text-muted">
-          state <span className="font-mono text-ink">{current}</span>
-          {step && (
-            <>
-              {" "}
-              after reading <span className="font-mono text-ink">{step.symbol}</span>
-            </>
-          )}
-        </span>
-      </div>
-      <StateTrail dfa={dfa} steps={trace.steps} index={i} />
-      <p className="min-h-[3em] text-sm text-ink-2" aria-live="off">
-        {finished ? (
-          <>
-            The DFA {trace.accepted ? "accepts" : "rejects"} <span className="font-mono text-ink">{showString(run.string.length > 24 ? `${run.string.slice(0, 23)}…` : run.string)}</span>
-            ; the model {run.accepted ? "accepted" : "rejected"} it and the truth is “{run.truth ? "in" : "not in"} {languageId}”.{" "}
-            <span className={cn("font-medium", agree ? "text-accept" : "text-reject")}>{agree ? "They agree on this string." : "Here they disagree."}</span>
-          </>
-        ) : (
-          <>One arrow per symbol, no features and no arithmetic: the whole cost of a DFA.</>
-        )}
-      </p>
-    </div>
-  );
-}
-
-function StaticGraph({ dfa }: { dfa: DfaPayload }) {
-  const maxWidth = useGraphMaxWidth(dfa);
-  return (
-    <div className="mx-auto w-full" style={{ maxWidth }}>
-      <AutomatonGraph automaton={dfa} rankdir="LR" maxHeight={440} />
-    </div>
+    <p className="text-sm text-ink-2">
+      On your string <span className="font-mono text-ink">{showString(run.string.length > 24 ? `${run.string.slice(0, 23)}…` : run.string)}</span> the
+      extracted DFA {says ? "accepts" : "rejects"}, the model {run.accepted ? "accepted" : "rejected"}, and the truth is “{run.truth ? "in" : "not in"}{" "}
+      {languageId}”. {agree ? "They agree on this string." : "Here they disagree."}
+    </p>
   );
 }
 
@@ -192,10 +93,16 @@ export function ExtractedDfaSection({ language, model, lastRun }: { language: La
   const pid = model.pipeline;
   const approachId = `lstar_${pid}` as ApproachId;
   const rec = useAutomaton(language.id, approachId);
+  const truthRec = useAutomaton(language.id, "min_dfa");
   const x = model.extracted_dfa;
   const dfa = rec.data?.automaton.kind === "dfa" ? rec.data.automaton : null;
+  const minDfa = truthRec.data?.automaton.kind === "dfa" ? truthRec.data.automaton : null;
   const ce = x.counterexample_to_truth ?? null;
   const ceDfaSays = dfa && ce !== null ? runDfa(dfa, ce).accepted : null;
+  // When the shapes differ the light table already runs the counterexample through both machines.
+  const sheetsRegister = useMemo(() => (dfa && minDfa ? matchDfas(minDfa, dfa).outcome !== "no-match" : true), [dfa, minDfa]);
+  const testAcc = model.metrics.test.accuracy;
+  const lead = x.equivalent_to_truth === true && testAcc < 0.995 ? `${pct(testAcc)} accurate, and yet the machine L* drew from it is exactly right.` : null;
   const stop =
     x.stop_reason === "equivalent"
       ? "converged: the teacher found no counterexample"
@@ -225,6 +132,7 @@ export function ExtractedDfaSection({ language, model, lastRun }: { language: La
 
       <div className="space-y-12">
         <div className="grid-paper rounded-3xl border border-line bg-panel/40 p-4 sm:p-6">
+          {lead && <p className="t-h3 mb-3 max-w-3xl text-ink">{lead}</p>}
           {x.states !== undefined && (
             <p className="mb-4 text-sm text-ink-2">
               <span className="font-display text-2xl font-semibold text-ink">{x.states} states</span>
@@ -237,19 +145,24 @@ export function ExtractedDfaSection({ language, model, lastRun }: { language: La
               )}
             </p>
           )}
-          {rec.isLoading ? (
+          {rec.isLoading || truthRec.isLoading ? (
             <div className="space-y-4" role="status" aria-label="Loading the extracted DFA">
-              <Skeleton className="h-[360px] w-full" />
+              <Skeleton className="h-[300px] w-full" />
               <Skeleton className="h-10 w-2/3" />
             </div>
-          ) : rec.error ? (
-            <ErrorState message={errorMessage(rec.error)} onRetry={() => rec.refetch()} />
-          ) : dfa ? (
-            lastRun ? (
-              <Replay dfa={dfa} run={lastRun} languageId={language.id} />
-            ) : (
-              <StaticGraph dfa={dfa} />
-            )
+          ) : rec.error || truthRec.error ? (
+            <ErrorState
+              message={errorMessage(rec.error ?? truthRec.error)}
+              onRetry={() => {
+                if (rec.error) rec.refetch();
+                if (truthRec.error) truthRec.refetch();
+              }}
+            />
+          ) : dfa && minDfa ? (
+            <div className="space-y-5">
+              <LightTable truth={minDfa} candidate={dfa} counterexample={ce} candidateLabel="Extracted DFA" maxHeight={300} />
+              {lastRun && <LastRunLine dfa={dfa} run={lastRun} languageId={language.id} />}
+            </div>
           ) : (
             <ErrorState message="The extracted automaton is not a DFA." />
           )}
@@ -281,7 +194,9 @@ export function ExtractedDfaSection({ language, model, lastRun }: { language: La
         {ce !== null ? (
           <div className="space-y-3">
             <h3 className="font-display text-xl font-semibold text-ink">The shortest string that tells it apart from {language.id}</h3>
-            <Tape input={ce} head={ce.length} status={ceDfaSays === null ? "idle" : ceDfaSays ? "accepted" : "rejected"} size="md" label="Shortest counterexample" />
+            {!sheetsRegister ? null : (
+              <Tape input={ce} head={ce.length} status={ceDfaSays === null ? "idle" : ceDfaSays ? "accepted" : "rejected"} size="md" label="Shortest counterexample" />
+            )}
             <p className="text-sm text-ink-2">
               {ceDfaSays === null ? (
                 <>

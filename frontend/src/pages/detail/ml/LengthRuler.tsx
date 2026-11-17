@@ -244,8 +244,8 @@ export function LengthRuler({ model, language }: { model: ModelDetail; language:
   }
 
   return (
-    <div ref={wrapRef} className="relative h-[235vh]">
-      <div className="sticky top-0 flex h-svh flex-col justify-center pb-10 pt-20">
+    <div ref={wrapRef} className="relative h-[200vh]">
+      <div className="sticky top-0 flex h-svh flex-col justify-start pb-10 pt-24">
         <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] lg:items-center lg:gap-12">
           <div className="relative h-[12.5rem] sm:h-[10.5rem] lg:h-[18rem]" aria-live="off">
             {beats.map((b, i) => (

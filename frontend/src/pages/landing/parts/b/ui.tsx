@@ -3,12 +3,12 @@ import { motion, useReducedMotion } from "motion/react";
 import CountUp from "@/components/reactbits/CountUp";
 import { cn } from "@/lib/utils";
 
-/** Fades content up (with a short blur) the first time it scrolls into view. */
+/** Fades content up the first time it scrolls into view (transform and opacity only). */
 export function Reveal({
   children,
   className,
   delay = 0,
-  y = 28,
+  y = 24,
 }: {
   children: ReactNode;
   className?: string;
@@ -20,9 +20,9 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y, filter: "blur(6px)" }}
-      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, margin: "0px 0px -12% 0px" }}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px 0px -22% 0px" }}
       transition={{ duration: 0.8, delay, ease: [0.2, 0.8, 0.2, 1] }}
     >
       {children}

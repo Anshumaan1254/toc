@@ -129,7 +129,6 @@ export function BestPerLanguage({ summary }: { summary: Summary }) {
     >
       <ol className="divide-y divide-line border-y border-line" aria-label="Best pipeline per language">
         {rows.map((r) => {
-          const solved = r.best && r.best.test_f1 >= 0.9999 && r.best.long_accuracy >= 0.9999;
           return (
             <li key={r.lang.id} className="grid grid-cols-[2.6rem_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 py-2.5 sm:grid-cols-[2.6rem_minmax(0,1fr)_auto_7.5rem]">
               <span className="font-mono text-sm text-ink">{r.lang.id}</span>
@@ -150,7 +149,7 @@ export function BestPerLanguage({ summary }: { summary: Summary }) {
               <span className="col-span-3 flex items-center gap-2 sm:col-span-1">
                 <Meter
                   value={r.best?.long_accuracy ?? 0}
-                  color={solved ? "var(--accept)" : "var(--reject)"}
+                  color={r.best ? PIPELINE_BY_ID[r.best.pipeline].color : "var(--ink-2)"}
                   label={`${r.lang.id}: accuracy on lengths ${bands.longDash} ${(((r.best?.long_accuracy ?? 0) as number) * 100).toFixed(1)}%`}
                 />
                 <span className="tabular w-11 shrink-0 text-right text-xs text-ink-2">{(((r.best?.long_accuracy ?? 0) as number) * 100).toFixed(0)}%</span>

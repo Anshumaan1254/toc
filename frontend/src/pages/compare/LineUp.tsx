@@ -4,7 +4,6 @@ import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform
 import { ArrowUpRight, Check, CircleSlash, X } from "lucide-react";
 import type { CompareRow, Family, Language } from "@/lib/types";
 import { duration, pct } from "@/lib/meta";
-import { BorderBeam } from "@/components/magicui/border-beam";
 import { Skeleton } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { cn } from "@/lib/utils";
@@ -96,9 +95,13 @@ interface RowProps {
   notes?: Record<string, string>;
   /** Position in the whole line-up: starts cascade from top to bottom. */
   order: number;
+  /** The string on screen, carried into the explorer link ("" is ε); null when no comparison is shown. */
+  string: string | null;
+  /** Some approach disagrees, so the agreeing rows step back to let the dissenters stand out. */
+  dissent: boolean;
 }
 
-function ApproachRow({ slot, language, runKey, stale, idle, loading, notes, order }: RowProps) {
+function ApproachRow({ slot, language, runKey, stale, idle, loading, notes, order, string, dissent }: RowProps) {
   const { meta, row } = slot;
   const reduce = useReducedMotion() ?? false;
   const ref = useRef<HTMLLIElement>(null);
@@ -130,7 +133,7 @@ function ApproachRow({ slot, language, runKey, stale, idle, loading, notes, orde
       <div className="min-w-0">
         <div className="leading-tight lg:truncate">
           <Link
-            to={`/explore/${language.id}/${meta.id}`}
+            to={`/explore/${language.id}/${meta.id}${string !== null ? `?s=${encodeURIComponent(string)}` : ""}`}
             className="group/name font-display text-[17px] font-semibold text-ink transition-colors hover:text-lamp"
             aria-label={`${name}: open it in the explorer`}
           >
@@ -247,16 +250,14 @@ function ApproachRow({ slot, language, runKey, stale, idle, loading, notes, orde
           initial={reduce ? false : { opacity: 0 }}
           animate={{ opacity: show ? 1 : 0 }}
           transition={reduce ? { duration: 0 } : { delay: tLand, duration: 0.35 }}
-        >
-          {show && !reduce && <BorderBeam size={160} duration={7} delay={dur} colorFrom="var(--reject)" colorTo="var(--lamp)" borderWidth={1.5} />}
-        </motion.div>
+        />
       )}
 
       <div
         className={cn(
           "relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-3 px-3 py-4 transition-opacity duration-300 sm:px-4 lg:gap-x-6",
           COLS,
-          stale && "opacity-45",
+          stale ? "opacity-45" : dissent && show && !wrong && "opacity-60 hover:opacity-100 focus-within:opacity-100",
         )}
       >
         {identity}
@@ -372,12 +373,15 @@ interface LineUpProps {
   loading: boolean;
   hasResult: boolean;
   notes?: Record<string, string>;
+  /** The string of the comparison on screen ("" is ε), null when none is shown. */
+  string: string | null;
 }
 
-export function LineUp({ slots, language, runKey, stale, idle, loading, hasResult, notes }: LineUpProps) {
+export function LineUp({ slots, language, runKey, stale, idle, loading, hasResult, notes, string }: LineUpProps) {
   const reduce = useReducedMotion() ?? false;
   const ref = useRef<HTMLDivElement>(null);
   const groups = groupByFamily(slots);
+  const dissent = slots.some((s) => isWrong(s.row));
 
   return (
     <div ref={ref} className="relative xl:pl-14">
@@ -453,6 +457,8 @@ export function LineUp({ slots, language, runKey, stale, idle, loading, hasResul
                   loading={loading}
                   notes={notes}
                   order={slots.indexOf(slot)}
+                  string={string}
+                  dissent={dissent}
                 />
               ))}
             </ol>

@@ -10,9 +10,10 @@ import { useTruthDfas } from "../parts/a/data";
 import { useRefreshOnResize } from "../parts/a/hooks";
 import { numberWord } from "../parts/a/text";
 import { Marquee } from "../parts/a/Marquee";
+import { RuleVsGuess } from "../parts/a/RuleVsGuess";
 import { WordReveal } from "../parts/a/WordReveal";
 
-const PER_LANGUAGE = 8;
+const PER_LANGUAGE = 5;
 
 interface Labelled {
   lang: string;
@@ -38,9 +39,7 @@ export function ProblemChapter() {
   const languages = useLanguages();
   const ids = useMemo(() => (languages.data ?? []).map((l) => l.id), [languages.data]);
   const dfas = useTruthDfas(ids);
-  const half = Math.ceil(ids.length / 2);
-  const rowA = useMemo(() => mix(ids.slice(0, half), dfas.byId), [ids, half, dfas.byId]);
-  const rowB = useMemo(() => mix(ids.slice(half), dfas.byId), [ids, half, dfas.byId]);
+  const row = useMemo(() => mix(ids, dfas.byId), [ids, dfas.byId]);
   const failed = languages.error ?? dfas.error;
 
   return (
@@ -95,24 +94,14 @@ export function ProblemChapter() {
           aria-hidden
           className="space-y-3 [mask-image:linear-gradient(to_right,transparent,black_9%,black_91%,transparent)]"
         >
-          {failed ? null : rowA.length === 0 ? (
-            <>
-              <SkeletonRow />
-              <SkeletonRow />
-            </>
+          {failed ? null : row.length === 0 ? (
+            <SkeletonRow />
           ) : (
-            <>
-              <Marquee duration={70}>
-                {rowA.map((s, i) => (
-                  <Chip key={i} item={s} />
-                ))}
-              </Marquee>
-              <Marquee duration={80} reverse>
-                {rowB.map((s, i) => (
-                  <Chip key={i} item={s} />
-                ))}
-              </Marquee>
-            </>
+            <Marquee duration={110}>
+              {row.map((s, i) => (
+                <Chip key={i} item={s} />
+              ))}
+            </Marquee>
           )}
         </div>
         {failed && (
@@ -132,8 +121,13 @@ export function ProblemChapter() {
         </figcaption>
       </figure>
 
+      {/* the question, drawn: one string through a machine and through a model */}
+      <div className="mx-auto mt-24 max-w-6xl px-6 lg:mt-28">
+        <RuleVsGuess />
+      </div>
+
       {/* the question */}
-      <div className="mx-auto mt-28 max-w-6xl px-6 lg:mt-36">
+      <div className="mx-auto mt-24 max-w-6xl px-6 lg:mt-32">
         <p className="max-w-2xl text-lg leading-relaxed text-ink-2">
           A classifier never sees the machine. It sees each string turned into numbers (its length, symbol counts, short substrings, its first and
           last symbols) and the label that goes with it.

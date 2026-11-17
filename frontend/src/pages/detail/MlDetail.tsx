@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useSearchParams } from "react-router";
 import { errorMessage, useModel } from "@/lib/api";
 import type { ClassifyResult } from "@/lib/types";
 import { ErrorState, Skeleton } from "@/components/ui/primitives";
@@ -16,6 +17,8 @@ export default function MlDetail({ language, approach }: DetailProps) {
   const pid = approach.pipeline;
   const model = useModel(language.id, pid);
   const [lastRun, setLastRun] = useState<ClassifyResult | null>(null);
+  const [params] = useSearchParams();
+  const initial = params.get("s"); // null: no autorun; "": run ε once on load
   const onResult = useCallback((r: ClassifyResult) => setLastRun(r), []);
 
   if (!pid) return <ErrorState message={`${approach.name} is not an ML pipeline.`} />;
@@ -32,7 +35,7 @@ export default function MlDetail({ language, approach }: DetailProps) {
 
   return (
     <div className="space-y-36 md:space-y-44">
-      <PipelineSection language={language} approach={approach} model={model.data} onResult={onResult} />
+      <PipelineSection language={language} approach={approach} model={model.data} onResult={onResult} initial={initial} />
       <InternalsSection model={model.data} language={language} lastRun={lastRun} />
       <PerformanceSection model={model.data} language={language} />
       <ExtractedDfaSection language={language} model={model.data} lastRun={lastRun} />

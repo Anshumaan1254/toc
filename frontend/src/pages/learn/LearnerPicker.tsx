@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Segmented } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import type { Learner } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export interface LearnerMeta {
   id: Learner;
@@ -57,45 +58,49 @@ const EXPLAIN: Record<Learner, ReactNode> = {
   ),
 };
 
+/** The five learners as one segmented control (short names; the full name is in the title and the line below). */
 export function LearnerPicker({ value, onChange }: { value: Learner; onChange: (l: Learner) => void }) {
+  return (
+    <Segmented<Learner>
+      label="Learning algorithm"
+      value={value}
+      onChange={onChange}
+      className="rounded-2xl sm:rounded-full"
+      options={LEARNERS.map((l) => ({
+        value: l.id,
+        title: l.name,
+        label: (
+          <span className="flex items-center gap-2">
+            <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: l.color }} aria-hidden />
+            <span>{l.short}</span>
+          </span>
+        ),
+      }))}
+    />
+  );
+}
+
+/** One line on what the chosen learner does. */
+export function LearnerExplain({ value, className }: { value: Learner; className?: string }) {
   const reduce = useReducedMotion();
   const meta = LEARNER_BY_ID[value];
   return (
-    <div className="space-y-4">
-      <Segmented<Learner>
-        label="Learning algorithm"
-        value={value}
-        onChange={onChange}
-        className="rounded-2xl sm:rounded-full"
-        options={LEARNERS.map((l) => ({
-          value: l.id,
-          title: l.name,
-          label: (
-            <span className="flex items-center gap-2">
-              <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: l.color }} aria-hidden />
-              <span className="lg:hidden">{l.short}</span>
-              <span className="hidden lg:inline">{l.name}</span>
-            </span>
-          ),
-        }))}
-      />
-      <div className="relative min-h-[4.5rem] max-w-3xl sm:min-h-[3.25rem]">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.p
-            key={value}
-            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6, filter: "blur(4px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6, filter: "blur(4px)" }}
-            transition={{ duration: 0.22 }}
-            className="text-[15px] text-ink-2"
-          >
-            <span className="mr-2 inline-flex translate-y-[-1px] items-center rounded-full border border-line px-2 py-0.5 align-middle text-xs font-medium text-muted">
-              {meta.mode === "passive" ? "Passive: uses only your examples" : "Active: the model answers L*'s questions"}
-            </span>
-            {EXPLAIN[value]}
-          </motion.p>
-        </AnimatePresence>
-      </div>
+    <div className={cn("relative min-h-[4.5rem] max-w-3xl sm:min-h-[3.25rem]", className)}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.p
+          key={value}
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, y: -6 }}
+          transition={{ duration: 0.2 }}
+          className="text-[15px] text-ink-2"
+        >
+          <span className="mr-2 inline-flex translate-y-[-1px] items-center rounded-full border border-line px-2 py-0.5 align-middle text-xs font-medium text-muted">
+            {meta.mode === "passive" ? "Passive: uses only your examples" : "Active: the model answers L*'s questions"}
+          </span>
+          {EXPLAIN[value]}
+        </motion.p>
+      </AnimatePresence>
     </div>
   );
 }

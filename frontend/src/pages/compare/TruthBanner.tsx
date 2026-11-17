@@ -21,6 +21,11 @@ interface TruthBannerProps {
   dfaFailed: boolean;
   notes?: Record<string, string>;
   maxTrain?: number;
+  /**
+   * Called with "language|string" once the answer key has given its verdict: the run finished or was
+   * skipped, the diagram failed to load, or the banner was scrolled past before it could play.
+   */
+  onSettled?: (key: string) => void;
 }
 
 function StateName({ children }: { children: ReactNode }) {
@@ -31,7 +36,7 @@ function StateName({ children }: { children: ReactNode }) {
  * The answer key. The hand-built DFA defines the language, so its verdict is the ground truth.
  * The banner replays its run locally (tape + read head + lit state) and lands the stamp at the end.
  */
-export function TruthBanner({ language, input, result, dfa, dfaFailed, notes, maxTrain }: TruthBannerProps) {
+export function TruthBanner({ language, input, result, dfa, dfaFailed, notes, maxTrain, onSettled }: TruthBannerProps) {
   const reduce = useReducedMotion() ?? false;
   const wide = useMediaQuery("(min-width: 640px)");
   // Observe the <section>, which both the idle and the running branch render: Motion's useInView only
@@ -54,6 +59,35 @@ export function TruthBanner({ language, input, result, dfa, dfaFailed, notes, ma
     setStarted(runKey);
     restart();
   }, [runKey, inView, started, restart]);
+
+  // ---------------------------------------------------------------- tell the page when the verdict is in
+  const key = input !== null ? `${language.id}|${input}` : null;
+  const runFinished = !!run && (reduce || (started === runKey && player.done));
+  useEffect(() => {
+    if (key && (runFinished || dfaFailed)) onSettled?.(key);
+  }, [key, runFinished, dfaFailed, onSettled]);
+  // Scrolled past before it could play (the reader is already down among the lanes): do not hold the headline back.
+  useEffect(() => {
+    if (!key || reduce || started === key) return;
+    const past = () => {
+      const el = ref.current;
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      const visible = Math.max(0, Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0));
+      return r.top < 0 && visible < 0.3 * r.height;
+    };
+    if (past()) {
+      onSettled?.(key);
+      return;
+    }
+    const onScroll = () => {
+      if (!past()) return;
+      window.removeEventListener("scroll", onScroll);
+      onSettled?.(key);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [key, reduce, started, onSettled]);
 
   if (input === null) {
     return (
@@ -182,7 +216,19 @@ export function TruthBanner({ language, input, result, dfa, dfaFailed, notes, ma
               )}
             </h2>
 
-            <Tape className="mt-6" input={input} head={consumed} status={status} size={tapeSize} label={`Input tape for ${language.id}`} />
+            <Tape
+              className="mt-6"
+              input={input}
+              head={consumed}
+              status={status}
+              size={tapeSize}
+              label={`Input tape for ${language.id}`}
+              note={
+                result?.longer_than_training && maxTrain !== undefined
+                  ? { at: maxTrain, text: "longer than any training string, so the models are extrapolating" }
+                  : undefined
+              }
+            />
 
             <p className="mt-5 min-h-[4.8rem] max-w-xl text-[15px] leading-relaxed text-ink-2" aria-live="off">
               {sentence}
@@ -195,9 +241,6 @@ export function TruthBanner({ language, input, result, dfa, dfaFailed, notes, ma
               <Badge tone="outline">
                 {input.length} symbol{input.length === 1 ? "" : "s"}
               </Badge>
-              {result?.longer_than_training && (
-                <Badge tone="lamp">longer than every training string{maxTrain !== undefined ? ` (max ${maxTrain})` : ""}</Badge>
-              )}
             </div>
           </div>
 

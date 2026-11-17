@@ -1,23 +1,23 @@
 import type { ReactNode } from "react";
+import { ChartFrame } from "@/components/charts/Charts";
 import { ErrorState, LoadingBlock } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
-import { errorMessage, useAutomaton, useSummary } from "@/lib/api";
+import { errorMessage, useSummary } from "@/lib/api";
 import { PIPELINE_BY_ID, PIPELINES } from "@/lib/meta";
 import type { Summary } from "@/lib/types";
-import { runDfa } from "@/lib/automata";
 import { useBands, words } from "../parts/b/bands";
 import { ComparisonTable } from "../parts/b/ComparisonTable";
-import { HeadlineSweep, type Slide } from "../parts/b/HeadlineSweep";
 import { Hi, Insights } from "../parts/b/Insights";
 import { BestPerLanguage, F1Heatmap, GeneralizationDrop, PipelineScores } from "../parts/b/ResultsCharts";
 import { derive, micro, pctNum, type Derived } from "../parts/b/results-data";
-import { ChanceMeter, ExtractionDots, PassiveDots, PipelineMeters, ToScale } from "../parts/b/SweepVisuals";
-import { ChapterTitle, Lead, Reveal, Rolling, SceneTitle } from "../parts/b/ui";
+import { SlopeChart } from "../parts/b/SlopeChart";
+import { ChapterTitle, Lead, Reveal, SceneTitle } from "../parts/b/ui";
 
 /**
- * Chapter: our results. Giant figures sweep past sideways, then one scene per question:
- * how the pipelines scored, language by language, what longer strings cost, automata against
- * models, and the findings in plain words. Every number comes from /api/summary.
+ * Chapter: our results. It opens on the wall at the training length (a slope chart of the
+ * hardest language), then one scene per question: how the pipelines scored, language by
+ * language, what longer strings cost, automata against models, and the findings that are not
+ * charted elsewhere. Every number comes from /api/summary.
  */
 export function ResultsChapter() {
   const summary = useSummary();
@@ -53,7 +53,6 @@ export function ResultsChapter() {
 function ResultsBody({ summary }: { summary: Summary }) {
   const d = derive(summary);
   const bands = useBands();
-  const slides = buildSlides(summary, d);
   const avg = summary.summary.pipeline_averages;
   const solved = summary.languages.filter((l) => {
     const b = summary.summary.best_pipeline_per_language[l.id];
@@ -79,7 +78,7 @@ function ResultsBody({ summary }: { summary: Summary }) {
 
   return (
     <>
-      <HeadlineSweep slides={slides} label="Headline results" />
+      <Wall summary={summary} d={d} linearFail={linearFail} />
 
       <div className="mx-auto max-w-6xl space-y-36 px-6 pb-16 md:space-y-48">
         <Scene
@@ -164,89 +163,76 @@ function Scene({ title, text, children, wide = false }: { title: string; text: R
   );
 }
 
-function buildSlides(summary: Summary, d: Derived): Slide[] {
-  const avg = summary.summary.pipeline_averages.test;
-  const slides: Slide[] = [
-    {
-      id: "lstar",
-      visual: <ExtractionDots summary={summary} />,
-      figure: (
-        <>
-          <Rolling value={d.lstar.exact} />
-          <span className="text-ink-2/70">/{d.lstar.total}</span>
-        </>
-      ),
-      text: (
-        <>
-          trained models gave up an exact copy of the true DFA when <Term k="lstar">L*</Term> questioned them.
-        </>
-      ),
-    },
-    {
-      id: "passive",
-      visual: <PassiveDots summary={summary} />,
-      figure: (
-        <>
-          <Rolling value={d.edsmExact} />
-          <span className="text-ink-2/70">/{d.languagesCount}</span>
-        </>
-      ),
-      text: (
-        <>
-          languages rebuilt exactly by <Term k="edsm">EDSM</Term> from the training strings alone. <Term k="rpni">RPNI</Term> rebuilt {d.rpniExact}.
-        </>
-      ),
-    },
-    {
-      id: "best",
-      visual: <PipelineMeters values={PIPELINES.map((p) => ({ id: p.id, short: p.short, color: p.color, value: avg[p.id].accuracy }))} />,
-      figure: <Rolling value={pctNum(d.best.accuracy)} decimals={1} suffix="%" />,
-      text: (
-        <>
-          mean test accuracy of the best pipeline, the {d.best.name.toLowerCase()}. Logistic regression trails at {pctNum(d.worst.accuracy)}%.
-        </>
-      ),
-    },
-  ];
-  if (d.hardest)
-    slides.push({
-      id: "hardest",
-      visual: <ChanceMeter value={d.hardest.longAccuracy} />,
-      figure: <Rolling value={pctNum(d.hardest.longAccuracy, 0)} suffix="%" />,
-      text: (
-        <>
-          is the best any model scored on long strings of {d.hardest.language}, &ldquo;{d.hardest.name.toLowerCase()}&rdquo;. A coin flip scores 50%.
-        </>
-      ),
-    });
-  if (d.truth && d.forest)
-    slides.push({
-      id: "size",
-      visual: <ToScale small={d.truth.mean_size} big={d.forest.mean_size} smallLabel="a DFA, to scale" bigLabel="a random forest" />,
-      figure: (
-        <span className="block text-[0.62em] leading-[1.02]">
-          <span className="text-lamp">{d.truth.mean_size.toFixed(1)}</span>
-          <span className="mx-3 align-middle text-[0.4em] font-normal text-muted">vs</span>
-          <Rolling value={Math.round(d.forest.mean_size)} />
-        </span>
-      ),
-      text: (
-        <>
-          transitions in the average DFA against nodes in the average random forest. The DFA answers in {micro(d.truth.inference_us_per_string)} µs per string,
-          the forest in {micro(d.forest.inference_us_per_string)} µs.
-        </>
-      ),
-    });
-  return slides;
+/**
+ * The opener: the wall at the training length. The hardest language's pipelines fall from
+ * their test accuracy to a coin flip on longer strings while the DFA stays at 100%.
+ */
+function Wall({ summary, d, linearFail }: { summary: Summary; d: Derived; linearFail?: { id: string; f1: number } }) {
+  const bands = useBands();
+  const hard = d.hardest;
+  if (!hard) return null;
+  const per = summary.ml[hard.language];
+  const series = PIPELINES.filter((p) => per?.[p.id]);
+  const testAcc = series.map((p) => per[p.id].test.accuracy);
+  const longAcc = series.map((p) => per[p.id].long.accuracy);
+  const binary = /^binary multiple of (\d+)$/i.exec(hard.name);
+  const subject = binary ? `binary multiples of ${binary[1]} become` : `${hard.language} (“${hard.name}”) becomes`;
+  const coin = hard.longAccuracy < 0.6;
+  const claim = `Past length ${summary.meta.max_train_length}, ${subject} ${coin ? "a coin flip" : `a ${pctNum(hard.longAccuracy, 0)}% guess`}.`;
+
+  // the second hard case: the language that fools the weakest pipeline outright, and what the tree models do on its long strings
+  const fooled = linearFail ? summary.ml[linearFail.id] : undefined;
+  const trees = PIPELINES.filter((p) => (p.id === "dt" || p.id === "rf") && fooled?.[p.id]);
+  const treesSlip = fooled && trees.length > 0 && trees.every((p) => fooled[p.id].test.accuracy - fooled[p.id].long.accuracy > 0.1);
+  const worstOnIt = fooled?.[d.worst.id]?.test.accuracy;
+
+  const testLabel = `test, lengths ${bands.trainMin} to ${bands.trainMax ?? summary.meta.max_train_length}`;
+  const longLabel = `long, ${bands.longWords}`;
+  return (
+    <div className="mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-6 py-20 md:py-24">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)] lg:items-center lg:gap-16">
+        <Reveal>
+          <h3 className="t-h2 text-ink">{claim}</h3>
+          <p className="mt-5 text-lg leading-relaxed text-ink-2">
+            On {hard.language} the pipelines reach {pctNum(Math.min(...testAcc))}% to {pctNum(Math.max(...testAcc))}% on the test split. On strings of{" "}
+            {bands.longWords} symbols none of them beats {pctNum(Math.max(...longAcc))}%. The ground-truth DFA reads any length and stays at 100%.
+          </p>
+          {linearFail && fooled && worstOnIt !== undefined && worstOnIt < 0.7 && (
+            <p className="mt-5 max-w-md text-base leading-relaxed text-ink-2">
+              {linearFail.id} fools the {d.worst.name.toLowerCase()} outright ({pctNum(worstOnIt)}% on the test split)
+              {treesSlip ? (
+                <>
+                  , and the trees lose it on long strings:{" "}
+                  {trees
+                    .map((p) => `the ${p.name.toLowerCase()} falls from ${pctNum(fooled[p.id].test.accuracy)}% to ${pctNum(fooled[p.id].long.accuracy)}%`)
+                    .join(", ")}
+                </>
+              ) : null}
+              .
+            </p>
+          )}
+        </Reveal>
+        <Reveal delay={0.08}>
+          <ChartFrame
+            title={`${hard.language}, “${hard.name}”`}
+            subtitle="Accuracy of every pipeline before and after the training length"
+            table={{
+              columns: ["Approach", testLabel, longLabel],
+              rows: [
+                ["Ground-truth DFA", "100.0%", "100.0%"],
+                ...series.map((p) => [p.name, `${pctNum(per[p.id].test.accuracy)}%`, `${pctNum(per[p.id].long.accuracy)}%`]),
+              ],
+            }}
+          >
+            <SlopeChart summary={summary} language={hard.language} testLabel={testLabel} longLabel={longLabel} />
+          </ChartFrame>
+        </Reveal>
+      </div>
+    </div>
+  );
 }
 
 function Findings({ d }: { d: Derived }) {
-  const wrong = d.lstar.convergedWrong[0];
-  const extracted = useAutomaton(wrong?.language, wrong?.approach);
-  const truth = useAutomaton(wrong?.language, wrong ? "dfa" : undefined);
-  const cex = extracted.data?.metrics?.counterexample_to_truth;
-  const truthDfa = truth.data?.automaton.kind === "dfa" ? truth.data.automaton : null;
-  const truthAccepts = cex !== undefined && cex !== null && truthDfa ? runDfa(truthDfa, cex).accepted : null;
   const items: { id: string; text: ReactNode }[] = [];
   if (d.truthStates)
     items.push({
@@ -282,47 +268,16 @@ function Findings({ d }: { d: Derived }) {
       </>
     ),
   });
-  items.push({
-    id: "accuracy",
-    text: (
-      <>
-        On test strings the pipelines average <Hi>{pctNum(d.testRange[0])}%</Hi> to <Hi>{pctNum(d.testRange[1])}%</Hi>. On strings longer than any they trained
-        on: <Hi>{pctNum(d.longRange[0])}%</Hi> to <Hi>{pctNum(d.longRange[1])}%</Hi>.
-      </>
-    ),
-  });
-  if (d.hardest)
-    items.push({
-      id: "hardest",
-      text: (
-        <>
-          {d.hardest.name} ({d.hardest.language}) beats every model: the best scores <Hi>{pctNum(d.hardest.longAccuracy, 0)}%</Hi> on long strings, barely
-          better than guessing.
-          {d.hardest.note && <span className="mt-4 block max-w-2xl font-sans text-lg font-normal leading-relaxed tracking-normal text-ink-2">{d.hardest.note}</span>}
-        </>
-      ),
-    });
   if (d.truth && d.forest)
     items.push({
       id: "speed",
       text: (
         <>
-          A DFA classifies a string in <Hi>{micro(d.truth.inference_us_per_string)} µs</Hi> with about {d.truth.mean_size.toFixed(0)} transitions. A random forest
-          takes <Hi>{micro(d.forest.inference_us_per_string)} µs</Hi> and carries {Math.round(d.forest.mean_size).toLocaleString("en-US")} nodes.
+          A DFA classifies a string in <Hi>{micro(d.truth.inference_us_per_string)} µs</Hi> with about {d.truth.mean_size.toFixed(0)} transitions. A{" "}
+          {d.forest.approach.toLowerCase()} takes <Hi>{micro(d.forest.inference_us_per_string)} µs</Hi> and carries{" "}
+          {Math.round(d.forest.mean_size).toLocaleString("en-US")} nodes.
         </>
       ),
     });
-  if (wrong && cex !== undefined && cex !== null && truthAccepts !== null) {
-    const model = PIPELINE_BY_ID[wrong.approach.replace("lstar_", "") as keyof typeof PIPELINE_BY_ID]?.name.toLowerCase() ?? wrong.approach;
-    items.push({
-      id: "mistake",
-      text: (
-        <>
-          When L* converges on a DFA that differs from the truth, the difference is the model&apos;s own mistake: the {model} on {wrong.language}{" "}
-          {truthAccepts ? "rejects" : "accepts"} <Hi>{cex === "" ? "ε, the empty string" : cex}</Hi>.
-        </>
-      ),
-    });
-  }
   return <Insights items={items} />;
 }

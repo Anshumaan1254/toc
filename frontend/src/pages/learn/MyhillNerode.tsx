@@ -3,7 +3,7 @@ import { useWidth } from "@/components/charts/Charts";
 import { Term } from "@/components/ui/Term";
 import type { DfaPayload, SuffixRow } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { walk } from "./model";
+import { plural, walk } from "./model";
 
 const pairKey = (p: string, q: string) => (p < q ? `${p}\u0000${q}` : `${q}\u0000${p}`);
 const show = (s: string) => (s === "" ? "ε" : s);
@@ -175,7 +175,7 @@ export function MyhillNerode({
             </div>
           )}
           <p className="min-h-10 text-sm text-ink-2" aria-live="polite">
-            {explain ?? (missing > 0 ? `${missing} pairs have no separating suffix, so this machine is not minimal.` : `${rows.length} pairs, all told apart.`)}
+            {explain ?? (missing > 0 ? `${plural(missing, "pair")} ${missing === 1 ? "has" : "have"} no separating suffix, so this machine is not minimal.` : `${plural(rows.length, "pair")}, all told apart.`)}
           </p>
         </>
       )}

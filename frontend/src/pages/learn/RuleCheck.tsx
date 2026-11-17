@@ -1,13 +1,29 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { CircleCheck, SearchX } from "lucide-react";
-import { Confetti, type ConfettiRef } from "@/components/magicui/confetti";
 import { Button } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { showString } from "@/lib/meta";
-import { useThemeColors } from "@/lib/theme";
 import type { LearnResult } from "@/lib/types";
 import { compareWithRule, type Preset } from "./presets";
+
+/**
+ * The verdict stamp's look for "exact". A local copy: the shared VerdictStamp always carries
+ * data-testid="verdict", and this one must not be mistaken for the test bench's verdict.
+ */
+function ExactStamp() {
+  const reduce = useReducedMotion();
+  return (
+    <motion.span
+      initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 1.6, rotate: -14 }}
+      animate={{ opacity: 1, scale: 1, rotate: -6 }}
+      transition={reduce ? { duration: 0.1 } : { type: "spring", stiffness: 520, damping: 24, mass: 0.9, delay: 0.5 }}
+      className="inline-block rounded-lg border-[3px] border-double border-[color:var(--accept)] px-2.5 py-0.5 font-mono text-xs font-semibold tracking-[0.18em] text-accept"
+    >
+      EXACT
+    </motion.span>
+  );
+}
 
 /**
  * Did the machine learn the rule behind the preset? An exact answer: breadth-first search over
@@ -28,29 +44,8 @@ export function RuleCheck({
   onTryString: (s: string) => void;
 }) {
   const reduce = useReducedMotion();
-  const colors = useThemeColors();
-  const confetti = useRef<ConfettiRef>(null);
   const check = useMemo(() => compareWithRule(result.automaton, preset.dfa), [result.automaton, preset.dfa]);
   const exact = check?.equivalent === true;
-
-  useEffect(() => {
-    if (!exact || reduce) return;
-    const t = window.setTimeout(() => {
-      void confetti.current?.fire({
-        particleCount: 46,
-        spread: 70,
-        startVelocity: 26,
-        gravity: 1.15,
-        ticks: 140,
-        scalar: 0.75,
-        origin: { x: 0.12, y: 0.35 },
-        colors: [colors.accept, colors.lamp, colors.ink2],
-      });
-    }, 650);
-    return () => window.clearTimeout(t);
-    // fire once per learned machine
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result.session_id, exact]);
 
   if (!check) {
     return (
@@ -79,22 +74,18 @@ export function RuleCheck({
       className={
         exact
           ? "relative rounded-2xl border border-[color:var(--accept)]/40 bg-accept-soft p-5"
-          : "relative rounded-2xl border border-line bg-panel/85 p-5 shadow-[inset_3px_0_0_var(--lamp)]"
+          : "relative rounded-2xl border border-line bg-panel/85 p-5 shadow-[inset_3px_0_0_var(--line-strong)]"
       }
     >
-      <Confetti
-        ref={confetti}
-        manualstart
-        globalOptions={{ resize: true, useWorker: false }}
-        className="pointer-events-none absolute inset-0 h-full w-full rounded-2xl"
-        aria-hidden
-      />
       <div className="relative flex items-start gap-3">
-        {exact ? <CircleCheck className="mt-0.5 shrink-0 text-accept" size={22} aria-hidden /> : <SearchX className="mt-0.5 shrink-0 text-lamp" size={22} aria-hidden />}
+        {exact ? <CircleCheck className="mt-0.5 shrink-0 text-accept" size={22} aria-hidden /> : <SearchX className="mt-0.5 shrink-0 text-ink-2" size={22} aria-hidden />}
         <div className="min-w-0 space-y-2">
-          <h3 id="rule-title" className="font-display text-xl font-semibold text-ink">
-            {exact ? `It learned “${preset.label.toLowerCase()}” exactly` : `Not quite “${preset.label.toLowerCase()}” yet`}
-          </h3>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <h3 id="rule-title" className="font-display text-xl font-semibold text-ink">
+              {exact ? `It learned “${preset.label.toLowerCase()}” exactly` : `Not quite “${preset.label.toLowerCase()}” yet`}
+            </h3>
+            {exact && <ExactStamp />}
+          </div>
           {exact ? (
             <p className="text-sm text-ink-2">
               The machine accepts precisely the {preset.rule}. An <Term k="equivalence">equivalence check</Term> walked all {check.pairsVisited}{" "}

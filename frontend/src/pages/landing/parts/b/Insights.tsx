@@ -21,12 +21,10 @@ function Statement({ children }: { children: ReactNode }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.92", "start 0.5"] });
   const opacity = useTransform(scrollYProgress, [0, 1], [0.14, 1]);
   const y = useTransform(scrollYProgress, [0, 1], [36, 0]);
-  const blur = useTransform(scrollYProgress, [0, 0.7, 1], [5, 1, 0], { clamp: true });
-  const filter = useTransform(blur, (b) => `blur(${b.toFixed(2)}px)`);
   return (
     <motion.li
       ref={ref}
-      style={reduce ? undefined : { opacity, y, filter }}
+      style={reduce ? undefined : { opacity, y }}
       className="max-w-4xl font-display text-[clamp(1.6rem,4.2vw,3.4rem)] font-semibold leading-[1.1] tracking-[-0.015em] text-ink"
     >
       {children}
@@ -34,7 +32,7 @@ function Statement({ children }: { children: ReactNode }) {
   );
 }
 
-/** A number inside a statement: the lamp marks the figure the sentence turns on. */
+/** A number inside a statement: a hairline underline marks the figure the sentence turns on. */
 export function Hi({ children }: { children: ReactNode }) {
-  return <span className="text-lamp">{children}</span>;
+  return <span className="font-semibold text-ink underline decoration-[color:var(--ink-2)] decoration-1 underline-offset-[0.18em]">{children}</span>;
 }

@@ -5,7 +5,7 @@ import { useThemeColors } from "@/lib/theme";
 
 /**
  * React Bits LetterGlitch as a field of the language's own symbols behind the pipeline. It is mounted
- * only while its sheet is near the viewport, never under reduced motion, and it stirs while a string runs.
+ * only while its sheet is near the viewport, never under reduced motion, and it stirs only while a string runs (still while the reader reads). No lamp colour: amber is the read head's.
  */
 export function GlitchField({ symbols, busy }: { symbols: string[]; busy: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -26,9 +26,9 @@ export function GlitchField({ symbols, busy }: { symbols: string[]; busy: boolea
         <LetterGlitch
           characters={symbols.join("")}
           baseColor={c.line}
-          glitchColors={[c.lamp, c.ink2]}
-          baseOpacity={busy ? 0.2 : 0.12}
-          glitchAmount={busy ? 0.55 : 0.12}
+          glitchColors={[c.muted, c.ink2]}
+          baseOpacity={busy ? 0.16 : 0.1}
+          glitchAmount={busy ? 0.55 : 0}
           speed={busy ? 1.6 : 0.45}
           fontSize={15}
           density={0.85}

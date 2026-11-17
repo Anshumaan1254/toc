@@ -106,8 +106,8 @@ export function HeroMachine({ live, onStep, className }: { live: boolean; onStep
     <div className={cn("relative", className)}>
       <CropMarks />
       <div className="relative px-1 py-2 sm:px-5 sm:py-3">
-        {/* language picker */}
-        <div className="flex flex-wrap items-center gap-1.5" role="radiogroup" aria-label="Choose the machine">
+        {/* language picker: three quiet text links (amber is kept for the read head) */}
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1" role="radiogroup" aria-label="Choose the machine">
           {DEMOS.map((d, i) => {
             const meta = languages.data?.find((l) => l.id === d.id);
             const on = i === cursor.lang;
@@ -119,17 +119,24 @@ export function HeroMachine({ live, onStep, className }: { live: boolean; onStep
                 aria-checked={on}
                 onClick={() => pickLanguage(i)}
                 className={cn(
-                  "group relative flex items-center gap-2 rounded-full border px-3 py-1.5 text-left text-[13px] transition-colors",
-                  on ? "border-[color:var(--lamp)] bg-lamp-soft text-ink" : "border-line text-ink-2 hover:border-line-strong hover:text-ink",
+                  "t-caption flex min-h-8 items-baseline gap-1.5 py-1 text-left transition-colors",
+                  on ? "text-ink!" : "text-muted hover:text-ink-2!",
                 )}
               >
-                <span className={cn("font-mono text-xs", on ? "text-lamp" : "text-muted")}>{d.id}</span>
-                <span className="max-w-[11rem] truncate">{meta?.name ?? "…"}</span>
+                <span className="font-mono text-xs">{d.id}</span>
+                <span
+                  className={cn(
+                    "max-w-[11rem] truncate border-b pb-px",
+                    on ? "border-[color:var(--ink)]" : "border-transparent",
+                  )}
+                >
+                  {meta?.name ?? "…"}
+                </span>
               </button>
             );
           })}
         </div>
-        <p className="mt-3 min-h-[2.6rem] max-w-xl text-sm leading-snug text-muted">
+        <p className="mt-2 hidden min-h-[2.6rem] max-w-xl text-sm leading-snug text-muted sm:block">
           {lang ? (
             <>
               {lang.description}

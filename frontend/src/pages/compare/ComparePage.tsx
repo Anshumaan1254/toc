@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { errorMessage, useApproaches, useAutomaton, useCompare, useLanguages, useSummary } from "@/lib/api";
@@ -6,13 +6,13 @@ import type { CompareResult, DfaPayload } from "@/lib/types";
 import SplitText from "@/components/reactbits/SplitText";
 import { Button, ErrorState, Panel, Skeleton } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
-import { HeaderDots } from "./HeaderDots";
 import { Controls } from "./Controls";
 import { TruthBanner, TruthBannerSkeleton } from "./TruthBanner";
 import { Summary } from "./Summary";
 import { LineUp } from "./LineUp";
 import { DEFAULT_LANGUAGE, DEFAULT_STRING } from "./examples";
 import { buildSlots, stateNotes } from "./model";
+import { PhoneStringBar } from "./PhoneStringBar";
 
 const MAX_LENGTH = 200;
 
@@ -106,6 +106,14 @@ export default function ComparePage() {
 
   const slots = useMemo(() => buildSlots(approaches.data, shown), [approaches.data, shown]);
 
+  // The headline waits for the answer key: it is revealed once the banner's DFA has finished reading the
+  // string (or Skip to the end was pressed). Latched per string, so Replay does not hide it again.
+  const [settled, setSettled] = useState<Set<string>>(() => new Set());
+  const onSettled = useCallback((key: string) => {
+    setSettled((prev) => (prev.has(key) ? prev : new Set(prev).add(key)));
+  }, []);
+  const revealed = reduce || !!stale || (shownKey !== null && settled.has(shownKey));
+
   // ---------------------------------------------------------------- scroll-linked header: the title drifts and fades as you scroll on
   const headerRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: headerRef, offset: ["start start", "end start"] });
@@ -136,7 +144,7 @@ export default function ComparePage() {
       </p>
       {/* ------------------------------------------------------------ header */}
       <header ref={headerRef} className="relative isolate overflow-hidden border-b border-line">
-        <HeaderDots className="absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,black_50%,transparent_100%)]" />
+        <div aria-hidden className="grid-paper absolute inset-0 -z-10 opacity-70 [mask-image:linear-gradient(to_bottom,black_40%,transparent_100%)]" />
         <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-b from-transparent to-[color:var(--bg)]" />
         <div className="mx-auto max-w-6xl px-6 pb-14 pt-28 sm:pt-32">
           <motion.div
@@ -156,7 +164,7 @@ export default function ComparePage() {
               duration={0.9}
             />
             <motion.p
-              className="max-w-xl text-lg leading-relaxed text-ink-2 lg:pb-2"
+              className="hidden max-w-xl text-lg leading-relaxed text-ink-2 sm:block lg:pb-2"
               initial={reduce ? false : { opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: reduce ? 0 : 0.45, ease: [0.2, 0.8, 0.2, 1] }}
@@ -198,6 +206,7 @@ export default function ComparePage() {
                 loading={compare.isPending}
                 truth={truthDfa}
                 current={runKey ? sParam : null}
+                approaches={approaches.data}
               />
             ) : null}
           </motion.div>
@@ -214,6 +223,7 @@ export default function ComparePage() {
           dfaFailed={truthQuery.isError}
           notes={notes}
           maxTrain={maxTrain}
+          onSettled={onSettled}
         />
       ) : languages.isLoading ? (
         <TruthBannerSkeleton />
@@ -236,7 +246,7 @@ export default function ComparePage() {
             )}
             {failed && <ErrorState message={errorMessage(compare.error)} onRetry={retry} />}
             {shown && shownKey && !failed && (
-              <Summary result={shown} language={language} slots={slots} maxTrain={maxTrain} runKey={shownKey} stale={!!stale} />
+              <Summary result={shown} language={language} slots={slots} maxTrain={maxTrain} runKey={shownKey} stale={!!stale} revealed={revealed} />
             )}
             {!shown && !failed && runKey && (
               <div className="space-y-4" role="status" aria-label="Comparing every approach">
@@ -261,6 +271,7 @@ export default function ComparePage() {
           </div>
 
           <div className="mt-12">
+            {shown && <PhoneStringBar string={shown.string} />}
             {approaches.error && !shown ? (
               <ErrorState message={errorMessage(approaches.error)} onRetry={() => approaches.refetch()} />
             ) : (
@@ -273,6 +284,7 @@ export default function ComparePage() {
                 loading={!shown && !!runKey && !failed}
                 hasResult={!!shown}
                 notes={notes}
+                string={shown ? shown.string : null}
               />
             )}
           </div>

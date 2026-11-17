@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { useWidth } from "@/components/charts/Charts";
 import { int } from "@/lib/meta";
@@ -12,7 +12,7 @@ const short = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(v % 1000 === 0 ?
 
 /**
  * Strings per length, all ten languages together. The training pool (0-20) is drawn in the
- * quiet ink; the long pool (21-40, never trained on) carries the lamp accent. A marker shows
+ * quiet ink; the long pool (21-40, never trained on) is hatched. A marker shows
  * where training stops.
  */
 export function LengthHistogram({ main, long, trainMax, exhaustiveMax }: { main: Record<string, number>; long: Record<string, number>; trainMax: number; exhaustiveMax: number }) {
@@ -20,6 +20,7 @@ export function LengthHistogram({ main, long, trainMax, exhaustiveMax }: { main:
   const inView = useInView(ref, { once: true, margin: "0px 0px -15% 0px" });
   const reduce = useReducedMotion();
   const [hover, setHover] = useState<number | null>(null);
+  const hatchId = `hatch-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const lengths = [...new Set([...Object.keys(main), ...Object.keys(long)].map(Number))].sort((a, b) => a - b);
   const total = (n: number) => (main[n] ?? 0) + (long[n] ?? 0);
   const max = Math.max(...lengths.map(total), 1);
@@ -40,6 +41,12 @@ export function LengthHistogram({ main, long, trainMax, exhaustiveMax }: { main:
     <div ref={ref} className="relative w-full" onMouseLeave={() => setHover(null)}>
       {width > 0 && (
         <svg width={width} height={height} role="img" aria-label={`Strings per length from 0 to ${lengths[lengths.length - 1]}, all languages. Lengths up to ${trainMax} form the training pool; longer strings are held out.`}>
+          <defs>
+            <pattern id={hatchId} width={5} height={5} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width={5} height={5} fill="color-mix(in srgb, var(--ink-2) 45%, transparent)" />
+              <line x1={0} y1={0} x2={0} y2={5} stroke="var(--bg)" strokeWidth={1.6} strokeOpacity={0.55} />
+            </pattern>
+          </defs>
           {ticks.map((t) => (
             <g key={t}>
               <line x1={m.left} x2={width - m.right} y1={y(t)} y2={y(t)} stroke="var(--line)" />
@@ -68,8 +75,10 @@ export function LengthHistogram({ main, long, trainMax, exhaustiveMax }: { main:
                   x={x(n) + 1}
                   width={bw}
                   rx={Math.min(3, bw / 3)}
-                  fill={isLong ? "var(--lamp)" : "var(--ink-2)"}
-                  fillOpacity={isLong ? 0.95 : hover === n ? 0.9 : 0.62}
+                  fill={isLong ? `url(#${hatchId})` : "var(--ink-2)"}
+                  fillOpacity={isLong ? 1 : hover === n ? 0.9 : 0.62}
+                  stroke={isLong ? "color-mix(in srgb, var(--ink-2) 70%, transparent)" : "none"}
+                  strokeWidth={isLong ? 1 : 0}
                   initial={reduce ? false : { y: y(0), height: 0 }}
                   animate={inView || reduce ? { y: yy, height: bh } : { y: y(0), height: 0 }}
                   transition={{ duration: 0.7, delay: reduce ? 0 : i * 0.022, ease: [0.2, 0.8, 0.2, 1] }}

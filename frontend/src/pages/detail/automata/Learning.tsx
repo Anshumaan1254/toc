@@ -2,6 +2,7 @@ import { createRef, useMemo, useRef, type ReactNode } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { AnimatedBeam } from "@/components/magicui/animated-beam";
 import CountUp from "@/components/reactbits/CountUp";
+import { DimensionLine } from "@/components/ui/DimensionLine";
 import { Term } from "@/components/ui/Term";
 import { useApproaches } from "@/lib/api";
 import { pct, showString } from "@/lib/meta";
@@ -31,10 +32,16 @@ function FidelityPanel({ metrics, modelName }: { metrics: AutomatonMetrics; mode
   ];
   const fid = metrics.test.fidelity ?? null;
   const acc = metrics.test.accuracy;
+  const model = modelName.toLowerCase();
+  const cex = metrics.counterexample_to_truth;
   let insight: string;
   if (fid === null) insight = "";
-  else if (fid >= 0.99 && acc < 0.97) insight = `The DFA copies the ${modelName.toLowerCase()} almost perfectly, so its errors are the model's own: the model never learned the language, and L* faithfully extracted what it did learn.`;
-  else if (fid >= 0.99) insight = `The DFA agrees with both the ${modelName.toLowerCase()} and the true language: the model really did learn a finite-state machine.`;
+  else if (fid >= 0.99 && acc < 0.97) insight = `The DFA copies the ${model} almost perfectly, so its errors are the model's own: the model never learned the language, and L* faithfully extracted what it did learn.`;
+  else if (fid >= 0.99 && metrics.equivalent_to_truth === true) insight = `The DFA agrees with both the ${model} and the true language: the model really did learn a finite-state machine.`;
+  else if (fid >= 0.99)
+    insight = `The DFA copies the ${model} and scores ${pct(acc)} on the test strings, yet it is not the true language${
+      cex != null ? `: the equivalence check finds a string they both get wrong, ${showString(cex)}.` : "."
+    }`;
   else if (acc > fid + 0.05) insight = `The DFA is closer to the truth than to its own model. With a limited state budget L* could not copy every mistake of the ${modelName.toLowerCase()}, and the simpler machine it kept is more right than the model.`;
   else insight = `The DFA neither matches the model exactly nor the language: it is an approximation of an approximation.`;
   return (
@@ -322,8 +329,15 @@ export function PassiveStory({ learning, metrics, dfa, approachId, consistent }:
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <PrefixFold dfa={dfa} ptaStates={learning.pta_states ?? 0} />
         <div className="grid grid-cols-2 content-start gap-x-8 gap-y-8">
-          <BigNumber value={learning.pta_states ?? 0} label="states in the prefix tree" />
-          <BigNumber value={learning.states ?? dfa.states.length} label="states after merging" />
+          <div className="col-span-2 min-w-0 space-y-2" role="img" aria-label={`${(learning.pta_states ?? 0).toLocaleString("en-US")} prefix-tree states merged down to ${learning.states ?? dfa.states.length}`}>
+            <div className="flex items-baseline justify-between gap-6">
+              <span className="t-stat text-ink">
+                <CountUp to={learning.pta_states ?? 0} separator="," mode="roll" duration={1.6} easing="expo" />
+              </span>
+              <span className="t-stat text-ink">{learning.states ?? dfa.states.length}</span>
+            </div>
+            <DimensionLine label={`${(learning.pta_states ?? 0).toLocaleString("en-US")} prefix-tree states to ${learning.states ?? dfa.states.length}`} />
+          </div>
           <BigNumber value={learning.merges ?? 0} label="merges kept" hint={learning.merge_attempts ? `${learning.merge_attempts} merges tried` : undefined} />
           <BigNumber value={learning.promotions ?? 0} label="promotions to red" />
           <BigNumber value={(learning.learning_time_s ?? metrics?.learning_time_s ?? 0) * 1000} decimals={1} suffix="ms" label="learning time" />

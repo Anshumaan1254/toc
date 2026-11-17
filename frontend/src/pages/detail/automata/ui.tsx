@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode, type RefObject } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { Pause, Play, RotateCcw, SkipForward, StepBack, StepForward } from "lucide-react";
 import DotGrid from "@/components/reactbits/DotGrid";
-import { Segmented } from "@/components/ui/primitives";
-import { layoutGraph, toGraphModel } from "@/components/graph/layout";
+import { Kbd, Segmented } from "@/components/ui/primitives";
+import { layoutGraph, toGraphModel, type Layout } from "@/components/graph/layout";
 import { useThemeColors } from "@/lib/theme";
 import { showString } from "@/lib/meta";
 import type { AutomatonPayload } from "@/lib/types";
@@ -54,6 +54,105 @@ export function useGraphBox(automaton: AutomatonPayload, rankdir: "LR" | "TB") {
     const l = layoutGraph(toGraphModel(automaton), { rankdir, r: stateRadius(automaton) });
     return { width: l.width, height: l.height };
   }, [automaton, rankdir]);
+}
+
+// ------------------------------------------------------------------ stage geometry
+/** Below this scale state labels stop being legible, so the machine is drawn on a sheet that scrolls sideways. */
+export const MIN_SHEET_SCALE = 0.55;
+const SHEET_FADE = "linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent)";
+
+/**
+ * Picks the layout for a run stage. Phones prefer top-to-bottom, unless that would be smaller than
+ * left-to-right; when even the best fit is below MIN_SHEET_SCALE the stage pans instead of shrinking.
+ */
+export function useStageGeometry(automaton: AutomatonPayload, narrow: boolean, width: number, maxHeight: number) {
+  const r = useMemo(() => stateRadius(automaton), [automaton]);
+  const lr = useMemo(() => layoutGraph(toGraphModel(automaton), { rankdir: "LR", r }), [automaton, r]);
+  const tb = useMemo(() => (narrow && automaton.states.length > 3 ? layoutGraph(toGraphModel(automaton), { rankdir: "TB", r }) : null), [automaton, r, narrow]);
+  const fit = (l: Layout) => (width > 0 ? Math.min(width / l.width, maxHeight / l.height) : 1);
+  const useTb = tb !== null && (fit(tb) >= MIN_SHEET_SCALE || fit(tb) >= fit(lr));
+  const layout = useTb ? tb : lr;
+  return { layout, rankdir: (useTb ? "TB" : "LR") as "LR" | "TB", radius: r, pan: width > 0 && fit(layout) < MIN_SHEET_SCALE };
+}
+
+/**
+ * The drawing area of a run stage. Normally centred and capped at 1.55x the layout; when `pan` is set,
+ * drawn at MIN_SHEET_SCALE on a sideways-scrolling sheet that keeps the active states centred.
+ */
+export function StageSheet({ layout, pan, focus, children }: { layout: Layout; pan: boolean; focus: string[]; children: (maxHeight: number | undefined) => ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const focusKey = focus.join(" ");
+  useEffect(() => {
+    const el = ref.current;
+    if (!pan || !el) return;
+    const xs = layout.nodes.filter((n) => focus.includes(n.id)).map((n) => n.x);
+    if (xs.length === 0) return;
+    const x = ((Math.min(...xs) + Math.max(...xs)) / 2) * MIN_SHEET_SCALE;
+    el.scrollTo({ left: Math.max(0, x - el.clientWidth / 2), behavior: reduce ? "auto" : "smooth" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pan, focusKey, layout, reduce]);
+  if (!pan) {
+    return (
+      <div className="mx-auto my-auto w-full py-3" style={{ maxWidth: Math.max(300, layout.width * 1.55) }}>
+        {children(undefined)}
+      </div>
+    );
+  }
+  return (
+    <div
+      ref={ref}
+      className="no-scrollbar my-auto w-full overflow-x-auto py-3"
+      style={{ maskImage: SHEET_FADE, WebkitMaskImage: SHEET_FADE }}
+      data-lenis-prevent=""
+      tabIndex={0}
+      role="group"
+      aria-label="State diagram on a sheet that scrolls sideways and follows the read head"
+    >
+      <div style={{ width: Math.round(layout.width * MIN_SHEET_SCALE) }}>{children(Math.ceil(layout.height * MIN_SHEET_SCALE) + 2)}</div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------------ keyboard
+/**
+ * Space = play/pause, Left/Right = step, Home = restart, while the stage is on screen.
+ * Keys typed into a field or pressed on a button keep their usual meaning.
+ */
+export function usePlayerKeys(ref: RefObject<HTMLElement | null>, player: PlayerLike, enabled: boolean) {
+  const inView = useInView(ref, { amount: 0.2 });
+  const latest = useRef(player);
+  useEffect(() => {
+    latest.current = player;
+  });
+  useEffect(() => {
+    if (!inView || !enabled) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      const t = e.target instanceof Element ? e.target : null;
+      // Fields and composite widgets own every key; a focused button or link keeps Space for itself.
+      if (t?.closest("input, textarea, select, [contenteditable], [role='tab'], [role='slider'], [role='radio'], [role='menu']")) return;
+      if (e.key === " " && t?.closest("button, a, summary")) return;
+      const p = latest.current;
+      if (e.key === " " || e.key === "Spacebar") p.toggle();
+      else if (e.key === "ArrowLeft") p.prev();
+      else if (e.key === "ArrowRight") p.next();
+      else if (e.key === "Home") p.restart();
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [inView, enabled]);
+}
+
+export function KeyHints({ className }: { className?: string }) {
+  return (
+    <p className={cn("t-caption hidden flex-wrap items-center gap-x-1.5 gap-y-1 text-muted sm:flex", className)}>
+      <Kbd>Space</Kbd> play <span aria-hidden>·</span> <Kbd>←</Kbd>
+      <Kbd>→</Kbd> step <span aria-hidden>·</span> <Kbd>Home</Kbd> restart
+    </p>
+  );
 }
 
 /** Starts a player the first time its section is well inside the viewport (not with reduced motion). */

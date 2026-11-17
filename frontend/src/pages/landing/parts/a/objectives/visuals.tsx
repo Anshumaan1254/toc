@@ -378,7 +378,10 @@ function Glyph({ id, seen }: { id: PipelineId; seen: boolean }) {
 export function ModelGlyphs() {
   const summary = useSummary();
   const [ref, seen] = useSeen<HTMLDivElement>();
+  const reduce = useReducedMotion();
   const data = summary.data;
+  /** Name, glyph, two bars on one shared 0-100 axis, the two values: one ruled row per model. */
+  const cols = "grid grid-cols-[3px_42px_minmax(0,3rem)_minmax(0,1fr)_3.4rem] items-center gap-x-3 sm:grid-cols-[3px_42px_minmax(0,9.5rem)_minmax(0,1fr)_3.4rem]";
   return (
     <div ref={ref}>
       {summary.isPending ? (
@@ -386,27 +389,75 @@ export function ModelGlyphs() {
       ) : summary.error || !data ? (
         <Failed error={summary.error} retry={() => void summary.refetch()} />
       ) : (
-        <div className="flex flex-col">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
-            {PIPELINES.map((p) => (
-              <figure key={p.id} className="min-w-0">
-                <div className="flex h-[clamp(64px,12vh,112px)] items-center justify-center rounded-lg border border-line bg-[color:var(--bg)]/50 px-3 py-2 [&>svg]:h-full [&>svg]:w-auto [&>svg]:max-w-full">
-                  <Glyph id={p.id} seen={seen} />
+        <figure className="flex flex-col">
+          <Legend
+            items={[
+              { label: "test split", color: "var(--ink-2)" },
+              { label: "strings longer than any in training", color: "var(--ink-2)", hollow: true },
+            ]}
+          />
+          <ul className="mt-3 border-b border-line" aria-label="Mean accuracy per classifier">
+            {PIPELINES.map((p, i) => {
+              const test = data.summary.pipeline_averages.test[p.id]?.accuracy ?? null;
+              const long = data.summary.pipeline_averages.long[p.id]?.accuracy ?? null;
+              const bar = (v: number | null, hollow: boolean, k: number) => (
+                <div className="relative h-[6px]">
+                  <motion.div
+                    className="absolute inset-y-0 left-0 w-full rounded-[2px]"
+                    style={{
+                      transformOrigin: "0% 50%",
+                      background: hollow ? `color-mix(in srgb, ${p.color} 22%, transparent)` : p.color,
+                      boxShadow: hollow ? `inset 0 0 0 1px ${p.color}` : undefined,
+                    }}
+                    initial={reduce ? false : { scaleX: 0 }}
+                    animate={{ scaleX: seen || reduce ? (v ?? 0) : 0 }}
+                    transition={{ duration: 0.8, delay: reduce ? 0 : i * 0.06 + k * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  />
                 </div>
-                <figcaption className="mt-2">
-                  <span className="block text-sm font-medium text-ink">{p.name}</span>
-                  <span className="block font-mono text-xs text-ink-2">
-                    test {pct(data.summary.pipeline_averages.test[p.id]?.accuracy)}, longer strings {pct(data.summary.pipeline_averages.long[p.id]?.accuracy)}
+              );
+              return (
+                <li
+                  key={p.id}
+                  className={cn(cols, "border-t border-line py-2.5")}
+                  aria-label={`${p.name}: ${pct(test ?? undefined)} on the test split, ${pct(long ?? undefined)} on longer strings`}
+                >
+                  <span aria-hidden className="h-4 w-[3px] rounded-full" style={{ background: p.color }} />
+                  <span aria-hidden className="flex h-7 w-[42px] items-center [&>svg]:h-full [&>svg]:w-full">
+                    <Glyph id={p.id} seen={seen} />
                   </span>
-                </figcaption>
-              </figure>
-            ))}
+                  <span className="min-w-0 text-sm font-medium leading-tight text-ink">
+                    <span className="hidden sm:inline">{p.name}</span>
+                    <span className="font-mono text-xs sm:hidden">{p.short}</span>
+                  </span>
+                  <span aria-hidden className="flex flex-col gap-[3px]">
+                    {bar(test, false, 0)}
+                    {bar(long, true, 1)}
+                  </span>
+                  <span aria-hidden className="flex flex-col items-end font-mono text-[11px] leading-[1.15] text-ink-2">
+                    <span>{pct(test ?? undefined)}</span>
+                    <span className="text-muted">{pct(long ?? undefined)}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+          {/* the shared axis under the bars */}
+          <div aria-hidden className={cn(cols, "pt-1 font-mono text-[10px] text-muted")}>
+            <span />
+            <span />
+            <span />
+            <span className="flex justify-between">
+              <span>0</span>
+              <span>50</span>
+              <span>100%</span>
+            </span>
+            <span />
           </div>
-          <p className="pt-4 text-xs text-muted">
+          <figcaption className="pt-3 text-xs text-muted">
             Mean accuracy over the {numberWord(data.languages.length)} languages. Every model sees the same {data.meta.feature_count_binary} features per
             string.
-          </p>
-        </div>
+          </figcaption>
+        </figure>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/react";
 import { AutomatonGraph } from "@/components/graph/AutomatonGraph";
+import { LightTable } from "@/components/graph/LightTable";
 import { ErrorState, LoadingBlock } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { errorMessage, useAutomaton, useSummary } from "@/lib/api";
@@ -233,7 +234,7 @@ function Story({ replay, learning, truth, model, modelAccuracy, metrics, budget,
   const current = steps[Math.min(active, steps.length - 1)];
   return (
     <div className="relative grid grid-cols-1 gap-x-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-      <div className="sticky top-[4.25rem] z-10 -mx-6 bg-bg/92 px-6 pb-3 pt-2 backdrop-blur-md lg:order-2 lg:top-24 lg:mx-0 lg:flex lg:h-[calc(100svh-8rem)] lg:items-center lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+      <div className="sticky top-[6.5rem] z-10 -mx-6 bg-bg/92 px-6 pb-3 pt-2 backdrop-blur-md lg:order-2 lg:top-24 lg:mx-0 lg:flex lg:h-[calc(100svh-8rem)] lg:items-center lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
         <Stage step={current} replay={replay} truth={truth} model={model} modelAccuracy={modelAccuracy} metrics={metrics} compact={!roomy} />
       </div>
       <ol className="relative pb-[16svh] pt-[4svh] lg:order-1 lg:py-[20svh]">
@@ -315,6 +316,9 @@ function Stage({
           )}
         </div>
         <div className="min-w-0 space-y-3">
+          {isResult && hyp && !compact ? (
+            <LightTable truth={truth} candidate={hyp} candidateLabel="Extracted DFA" maxHeight={170} />
+          ) : (
           <div className={cn("relative rounded-xl border border-line bg-bg/40", compact ? "h-[8.5rem]" : "h-[15rem]")}>
             <AnimatePresence mode="wait" initial={false}>
               {hyp ? (
@@ -346,10 +350,11 @@ function Stage({
             {hyp && (
               <span className="absolute left-2 top-1.5 text-[10.5px] text-muted md:text-xs">
                 {isResult ? "the extracted DFA" : stale ? "previous guess, being revised" : "current guess"}
-                {exact && !stale && <span className="ml-2 text-accept">✓ exactly the truth</span>}
+                {exact && !stale && <span className="ml-2 text-accept">✓ matches the ground truth</span>}
               </span>
             )}
           </div>
+          )}
           <Teacher step={step} cex={cex} runnerDone={runner.done} model={model} modelAccuracy={modelAccuracy} metrics={metrics} truth={truth} compact={compact} />
         </div>
       </div>

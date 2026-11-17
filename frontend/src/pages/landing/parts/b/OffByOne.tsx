@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView } from "motion/react";
 import { HBars } from "@/components/charts/Charts";
-import { AutomatonGraph } from "@/components/graph/AutomatonGraph";
+import { LightTable } from "@/components/graph/LightTable";
 import { ErrorState, LoadingBlock, StringInput } from "@/components/ui/primitives";
 import { errorMessage, useAutomaton, useClassify } from "@/lib/api";
 import { runDfa } from "@/lib/automata";
@@ -15,8 +15,8 @@ import { SceneTitle } from "./ui";
 
 /**
  * A converged L* extraction that still differs from the truth: the difference is the model's
- * own mistake. Both machines side by side, the disagreeing state lit, and a live question to
- * the model about any string.
+ * own mistake. The extracted DFA is laid over the truth on the light table, the disagreeing
+ * state stays ringed, and a live question to the model about any string follows.
  */
 export function OffByOne({ language, approach, languageName }: { language: string; approach: LStarId; languageName: string }) {
   const extracted = useAutomaton(language, approach);
@@ -27,7 +27,7 @@ export function OffByOne({ language, approach, languageName }: { language: strin
   const ex = extracted.data?.automaton.kind === "dfa" ? extracted.data.automaton : null;
   const tr = truth.data?.automaton.kind === "dfa" ? truth.data.automaton : null;
   const cex = extracted.data?.metrics?.counterexample_to_truth;
-  if (!ex || !tr || cex === undefined || !extracted.data?.metrics) return <LoadingBlock label="Loading both automata…" />;
+  if (!ex || !tr || cex === undefined || !extracted.data?.metrics) return <LoadingBlock label="Loading both automata…" className="min-h-[36rem]" />;
   return <Body language={language} approach={approach} languageName={languageName} extracted={ex} truth={tr} cex={cex} metrics={extracted.data.metrics} />;
 }
 
@@ -52,8 +52,6 @@ function Body({
   const model = PIPELINE_BY_ID[pipeline].name;
   const bands = useBands();
   const onlyEmpty = cex === "" && agreeOnNonEmpty(extracted, truth);
-  const exStart = runDfa(extracted, "");
-  const trStart = runDfa(truth, "");
   return (
     <div className="space-y-12">
     <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
@@ -73,44 +71,12 @@ function Body({
           )}
         </p>
       </div>
-      <div className="grid grid-cols-1 content-start gap-5">
-        <Machine
-          title={`L* from the ${model.toLowerCase()}`}
-          dfa={extracted}
-          verdict={exStart.accepted ? "accept" : "reject"}
-          note={`starts in ${extracted.start}: ${exStart.accepted ? "accepting" : "rejecting"}`}
-        />
-        <Machine title="Ground truth" dfa={truth} verdict={trStart.accepted ? "accept" : "reject"} note={`starts in ${truth.start}: ${trStart.accepted ? "accepting" : "rejecting"}`} />
-        <p className="text-sm text-muted">
-          Both machines read ε without moving, so the answer is decided by the start state alone: the halo shows each machine&apos;s verdict on ε.
-        </p>
+      <div className="min-w-0">
+        <LightTable truth={truth} candidate={extracted} counterexample={cex} candidateLabel={`L* from the ${model.toLowerCase()}`} maxHeight={300} />
       </div>
     </div>
     <AskTheModel language={language} approach={`ml_${pipeline}` as ApproachId} model={model} extracted={extracted} truth={truth} initial={cex ?? ""} />
     </div>
-  );
-}
-
-function Machine({ title, dfa, verdict, note }: { title: string; dfa: DfaPayload; verdict: "accept" | "reject"; note: string }) {
-  return (
-    <figure className="grid-paper relative rounded-2xl border border-line bg-panel/70 p-4">
-      <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="font-display text-lg font-semibold text-ink">{title}</span>
-        <span className="text-xs text-muted">{note}</span>
-      </figcaption>
-      <div className="mt-2">
-        <AutomatonGraph
-          automaton={dfa}
-          active={[dfa.start]}
-          verdict={verdict}
-          zoomable={false}
-          rankdir="LR"
-          maxHeight={230}
-          radius={20}
-          ariaLabel={`${title}: ${dfa.num_states} states, start state ${dfa.start} is ${verdict === "accept" ? "accepting" : "not accepting"}.`}
-        />
-      </div>
-    </figure>
   );
 }
 
@@ -154,8 +120,9 @@ function AskTheModel({
       <StringInput value={value} onChange={setValue} onSubmit={() => ask(value)} alphabet={truth.alphabet} submitLabel="Ask all three" loading={classify.isPending} label="A string" />
       {classify.isError && <ErrorState message={errorMessage(classify.error)} onRetry={() => asked !== null && ask(asked)} />}
       </div>
+      <div className="min-h-[19rem] space-y-4" aria-live="polite">
       {asked !== null && (
-        <div className="space-y-4" aria-live="polite">
+        <>
           <dl className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-2 text-sm">
             <dt className="text-ink-2">
               The {model.toLowerCase()} itself <span className="text-muted">(live, from the API)</span>
@@ -189,8 +156,9 @@ function AskTheModel({
               )}
             </div>
           )}
-        </div>
+        </>
       )}
+      </div>
     </div>
   );
 }

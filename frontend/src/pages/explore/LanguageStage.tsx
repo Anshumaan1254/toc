@@ -185,13 +185,17 @@ function MachineDemo({ dfa, language, running }: { dfa: DfaPayload; language: La
   }
 
   const iconButton =
-    "inline-flex h-9 items-center gap-1.5 rounded-full border border-line px-3 text-sm font-medium text-ink-2 transition-colors hover:border-line-strong hover:text-ink";
+    "inline-flex h-9 items-center gap-1.5 rounded-md px-2 text-sm font-medium text-ink-2 transition-colors hover:bg-panel-2/60 hover:text-ink";
 
   return (
     <div>
       {/* the drawing sheet with the ground-truth DFA */}
       <div ref={boxRef} className="grid-paper relative grid h-[230px] place-items-center rounded-2xl border border-line px-4 py-5 sm:h-[260px] lg:h-[280px]">
         <CornerMarks />
+        {/* the sheet's title block */}
+        <span className="t-annotation pointer-events-none absolute left-7 top-[7px] whitespace-nowrap">
+          {language.id} · ground-truth DFA · {dfa.states.length} state{dfa.states.length === 1 ? "" : "s"}
+        </span>
         <div
           ref={scrollerRef}
           className={cn("w-full", pan && "no-scrollbar overflow-x-auto")}
@@ -262,7 +266,7 @@ function MachineDemo({ dfa, language, running }: { dfa: DfaPayload; language: La
       </div>
 
       {/* manual control (pausing is also required for auto-playing content) */}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="-ml-2 mt-3 flex flex-wrap items-center gap-1">
         {!reduce && (
           <button
             type="button"
@@ -364,12 +368,12 @@ export function LanguageStage({ language, onChoose }: { language: Language; onCh
   const dfa = automaton && automaton.kind === "dfa" ? automaton : undefined;
 
   return (
-    <div ref={ref} className="relative rounded-[22px] border border-line bg-panel/85 p-5 shadow-[var(--shadow)] backdrop-blur-sm sm:p-7">
+    <div ref={ref} className="relative">
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={language.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
           <div className="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
             <h3 className="flex min-w-0 items-baseline gap-3 font-display font-semibold">
-              <span className="text-4xl text-lamp tabular">{language.id}</span>
+              <span className="text-4xl text-ink-2 tabular">{language.id}</span>
               <span className="min-w-0 text-2xl text-ink sm:text-[28px]">{language.name}</span>
             </h3>
             <div className="flex items-center gap-2 pt-1.5">
@@ -382,9 +386,9 @@ export function LanguageStage({ language, onChoose }: { language: Language; onCh
               </span>
             </div>
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
-            <code className="no-scrollbar max-w-full overflow-x-auto whitespace-nowrap rounded-lg border border-line bg-panel-2/60 px-3 py-1.5 font-mono text-[14px] text-ink sm:text-[15px]">
-              <DecryptedText text={language.regex} animateOn="view" sequential speed={28} useOriginalCharsOnly encryptedClassName="text-lamp" />
+          <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <code className="no-scrollbar max-w-full overflow-x-auto whitespace-nowrap font-mono text-[15px] text-ink sm:text-base">
+              <DecryptedText text={language.regex} animateOn="view" sequential speed={28} useOriginalCharsOnly encryptedClassName="text-muted" />
             </code>
             <span className="text-sm text-muted">
               {language.difficulty} for the ML pipelines, minimal <Term k="dfa">DFA</Term> with {language.expected_min_states} states

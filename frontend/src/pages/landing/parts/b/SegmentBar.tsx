@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * One whole split into a few parts (a tall segmented bar). Emphasis form: the highlighted
- * part carries the lamp accent, the rest stay in the quiet ink. Shares are printed inside the
+ * part is set in full ink, the rest stay in the quiet ink. Shares are printed inside the
  * blocks that are wide enough; hover or focus names any block.
  */
 export function SegmentBar({
@@ -41,7 +41,7 @@ export function SegmentBar({
               animate={{ flexGrow: share }}
               style={{
                 flexBasis: 0,
-                background: on ? "var(--lamp)" : "color-mix(in srgb, var(--ink-2) 26%, var(--panel))",
+                background: on ? "var(--ink)" : "color-mix(in srgb, var(--ink-2) 26%, var(--panel))",
                 transition: reduce ? undefined : "background 0.45s ease",
               }}
               transition={{ duration: reduce ? 0 : 0.5 }}

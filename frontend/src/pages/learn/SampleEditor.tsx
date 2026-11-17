@@ -97,7 +97,7 @@ export function SampleColumn({ column, text, onChange, parsed, fillKey, flashKey
       aria-labelledby={`${id}-title`}
       className="flex min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-panel/90 shadow-[var(--shadow)] backdrop-blur-sm"
     >
-      <div className="flex items-center gap-3 border-b border-line px-4 py-3">
+      <div className="flex items-center gap-3 border-b border-line px-4 py-2.5">
         <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", accepted ? "bg-accept" : "bg-reject")} aria-hidden />
         <h3 id={`${id}-title`} className="font-display text-lg font-semibold text-ink">
           {title}
@@ -130,7 +130,7 @@ export function SampleColumn({ column, text, onChange, parsed, fillKey, flashKey
         </div>
       </div>
 
-      <div className="group/edit relative flex h-[15.75rem] md:h-[19.25rem]">
+      <div className="group/edit relative flex h-[13.75rem] md:h-[17.25rem]">
         {/* gutter: line numbers, red for lines that need attention */}
         <div className="w-10 shrink-0 overflow-hidden border-r border-line bg-panel-2/30" aria-hidden>
           <div ref={gutterRef} className="py-3 pr-2 text-right font-mono text-[11px] leading-7 will-change-transform">
@@ -237,11 +237,47 @@ export function PresetBar({
   onUndo: () => void;
 }) {
   return (
-    <div className="space-y-3">
-      <p id="preset-label" className="text-sm text-ink-2">
-        Or load examples of a language you can probably guess:
-      </p>
-      <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby="preset-label">
+    <div className="space-y-2">
+      <div className="flex min-h-8 flex-wrap items-center gap-x-3 gap-y-1">
+        <p id="preset-label" className="text-sm text-ink-2">
+          Or load examples of a language you can probably guess:
+        </p>
+        <div className="flex items-center gap-1">
+          <AnimatePresence initial={false}>
+            {activeId && (
+              <motion.button
+                key="shuffle"
+                type="button"
+                onClick={onReshuffle}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm text-ink-2 transition-colors hover:bg-panel-2/70 hover:text-ink"
+              >
+                <Dices size={15} aria-hidden /> Draw different examples
+              </motion.button>
+            )}
+            {canUndo && (
+              <motion.button
+                key="undo"
+                type="button"
+                onClick={onUndo}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-sm text-ink-2 transition-colors hover:bg-panel-2/70 hover:text-ink"
+              >
+                <Undo2 size={15} aria-hidden /> Bring back my strings
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+      <div
+        className="flex items-center gap-2 max-md:-mx-6 max-md:overflow-x-auto max-md:px-6 max-md:pb-1 md:flex-wrap [&>button]:shrink-0"
+        role="group"
+        aria-labelledby="preset-label"
+      >
         {PRESETS.map((p) => {
           const on = p.id === activeId;
           return (
@@ -252,7 +288,7 @@ export function PresetBar({
               onClick={() => onPick(p.id)}
               className={cn(
                 "group relative h-9 rounded-full border px-3.5 text-sm font-medium transition-colors",
-                on ? "border-[color:var(--lamp)] bg-lamp-soft text-ink" : "border-line bg-panel/70 text-ink-2 hover:border-line-strong hover:text-ink",
+                on ? "border-[color:var(--ink-2)] bg-panel-2 text-ink" : "border-line bg-panel/70 text-ink-2 hover:border-line-strong hover:text-ink",
               )}
             >
               {p.label}
@@ -260,34 +296,6 @@ export function PresetBar({
             </button>
           );
         })}
-        <AnimatePresence initial={false}>
-          {activeId && (
-            <motion.button
-              key="shuffle"
-              type="button"
-              onClick={onReshuffle}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-ink-2 transition-colors hover:bg-panel-2/70 hover:text-ink"
-            >
-              <Dices size={15} aria-hidden /> Draw different examples
-            </motion.button>
-          )}
-          {canUndo && (
-            <motion.button
-              key="undo"
-              type="button"
-              onClick={onUndo}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm text-ink-2 transition-colors hover:bg-panel-2/70 hover:text-ink"
-            >
-              <Undo2 size={15} aria-hidden /> Bring back my strings
-            </motion.button>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );

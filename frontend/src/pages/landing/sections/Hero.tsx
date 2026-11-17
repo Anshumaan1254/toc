@@ -10,7 +10,7 @@ import { useTheme, useThemeColors } from "@/lib/theme";
 import { HeroMachine, type MachineStep } from "../parts/a/HeroMachine";
 import { statePoint } from "../parts/a/geometry";
 import { PulseGrid, type PulseGridHandle } from "../parts/a/PulseGrid";
-import { useLiveGate, useRefreshOnResize } from "../parts/a/hooks";
+import { useLiveGate, useMediaQuery, useRefreshOnResize } from "../parts/a/hooks";
 import { numberWord } from "../parts/a/text";
 import { InlineSkeleton } from "../parts/a/ui";
 
@@ -27,6 +27,8 @@ export function Hero() {
   const live = useLiveGate(ref);
   const near = useInView(ref, { margin: "200px 0px 200px 0px" });
   const reduce = useReducedMotion();
+  // Below 768px the WebGL grid is not worth its cost: phones get the CSS drafting grid.
+  const roomy = useMediaQuery("(min-width: 768px)");
   const { theme } = useTheme();
   const colors = useThemeColors();
   const lenis = useLenis();
@@ -63,9 +65,13 @@ export function Hero() {
 
   return (
     <section ref={ref} aria-labelledby="hero-title" className="relative isolate overflow-x-clip">
-      {/* background: the drafting grid (WebGL only while near the viewport, CSS grid otherwise) */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        {near && !reduce ? (
+      {/* background: the drafting grid (WebGL only while near the viewport and on wide screens, CSS grid otherwise).
+          On lg the grid is held back to about a third of its strength behind the text column. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 lg:[mask-image:linear-gradient(to_right,rgba(0,0,0,0.35)_0%,rgba(0,0,0,0.35)_38%,black_55%)]"
+      >
+        {near && !reduce && roomy ? (
           <PulseGrid
             ref={grid}
             key={theme}
@@ -74,7 +80,7 @@ export function Hero() {
             variant="lines"
             cellSize={48}
             lineWidth={1}
-            glow={0.4}
+            glow={0}
             rippleStrength={0.8}
             rippleSpeed={0.75}
             rippleSize={1.15}
@@ -90,7 +96,7 @@ export function Hero() {
         )}
       </div>
 
-      <div className="mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-6 pb-14 pt-28 lg:pb-10">
+      <div className="mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-6 pb-14 pt-24 lg:pb-10">
         <h1
           id="hero-title"
           aria-label={`${TITLE_A} ${TITLE_B}`}
@@ -104,13 +110,17 @@ export function Hero() {
           </span>
         </h1>
 
-        <div className="mt-7 grid items-start gap-x-14 gap-y-12 lg:mt-6 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
+        <div className="mt-6 grid items-start gap-x-14 gap-y-10 lg:mt-6 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)]">
           <div className="max-w-xl lg:pt-2">
             <p className="text-[17px] leading-relaxed text-ink-2">
               A <Term k="dfa">DFA</Term> decides whether a string belongs to a language by reading it one symbol at a time, and it never makes a
               mistake. We generated {num(rows)} labelled strings for {num(languageCount, true)} regular languages, built and minimized a DFA for
-              each, and trained {num(pipelineCount, true)} classifiers to tell members from non-members. Then we extracted the DFA each classifier
-              had actually learned and compared them all on accuracy, size, speed and strings longer than any they were trained on.
+              each, and trained {num(pipelineCount, true)} classifiers to tell members from non-members.
+              <span className="hidden sm:inline">
+                {" "}
+                Then we extracted the DFA each classifier had actually learned and compared them all on accuracy, size, speed and strings longer
+                than any they were trained on.
+              </span>
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -131,7 +141,8 @@ export function Hero() {
             </div>
           </div>
 
-          <HeroMachine live={live} onStep={onStep} className="w-full" />
+          {/* Phones: the live machine comes straight after the headline; the lede and buttons follow. */}
+          <HeroMachine live={live} onStep={onStep} className="order-first w-full lg:order-none" />
         </div>
       </div>
     </section>

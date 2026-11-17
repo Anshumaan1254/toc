@@ -30,9 +30,12 @@ export interface ParsedColumn {
   strings: string[];
 }
 
+export type IssueKind = "invalid" | "too-many" | "conflict" | "alphabet" | "one-sided";
+
 export interface Issue {
-  /** Blocking issues stop the request; soft ones go to the server, which explains them. */
+  /** Blocking issues stop the request (and disable Learn); soft ones go to the server, which explains them. */
   severity: "block" | "soft";
+  kind: IssueKind;
   message: string;
   column?: Column;
   line?: number;
@@ -104,26 +107,36 @@ export function analyzeSamples(acceptedText: string, rejectedText: string): Samp
   for (const [name, col] of columns) {
     for (const line of col.lines) {
       if (line.status === "invalid") {
-        issues.push({ severity: "block", column: name, line: line.index, message: `Line ${line.index + 1} of ${name === "accepted" ? "Accepted" : "Rejected"} ${line.note}.` });
+        issues.push({ severity: "block", kind: "invalid", column: name, line: line.index, message: `Line ${line.index + 1} of ${name === "accepted" ? "Accepted" : "Rejected"} ${line.note}.` });
       }
     }
   }
   const total = accepted.strings.length + rejected.strings.length;
-  if (total > MAX_SAMPLES) issues.push({ severity: "block", message: `That is ${total.toLocaleString("en-US")} strings; the learner takes at most ${MAX_SAMPLES.toLocaleString("en-US")}.` });
+  if (total > MAX_SAMPLES) issues.push({ severity: "block", kind: "too-many", message: `That is ${total.toLocaleString("en-US")} strings; the learner takes at most ${MAX_SAMPLES.toLocaleString("en-US")}.` });
   if (conflicts.length) {
-    const shown = conflicts.slice(0, 4).map((s) => `“${show(s)}”`).join(", ");
+    const shown = conflicts.slice(0, 3).map((s) => `“${show(s)}”`).join(", ");
+    const more = conflicts.length > 3 ? ` and ${conflicts.length - 3} more` : "";
     issues.push({
-      severity: "soft",
-      message: `${shown}${conflicts.length > 4 ? ` and ${conflicts.length - 4} more` : ""} ${conflicts.length === 1 ? "is" : "are"} in both columns. No machine can accept and reject the same string.`,
+      severity: "block",
+      kind: "conflict",
+      message:
+        conflicts.length === 1
+          ? `This string is in both lists: ${shown}. Remove it from one.`
+          : `These strings are in both lists: ${shown}${more}. Remove each from one.`,
     });
   }
   if (alphabet.length > MAX_SYMBOLS) {
-    issues.push({ severity: "soft", message: `Your strings use ${alphabet.length} different symbols (${alphabet.join(", ")}); a learner here takes at most ${MAX_SYMBOLS}.` });
+    issues.push({
+      severity: "block",
+      kind: "alphabet",
+      message: `Your strings use ${alphabet.length} different symbols (${alphabet.join(", ")}); a learner here takes at most ${MAX_SYMBOLS}.`,
+    });
   }
   if (total > 0 && (accepted.strings.length === 0 || rejected.strings.length === 0)) {
     issues.push({
-      severity: "soft",
-      message: accepted.strings.length === 0 ? "Add at least one accepted string. A learner needs both kinds to find a boundary." : "Add at least one rejected string. A learner needs both kinds to find a boundary.",
+      severity: "block",
+      kind: "one-sided",
+      message: accepted.strings.length === 0 ? "Add at least one accepted string." : "Add at least one rejected string.",
     });
   }
 

@@ -9,7 +9,7 @@ import { exampleStrings, plural, setKey, subsetsOf } from "./automata/model";
 import { NfaStage } from "./automata/NfaStage";
 import { SubsetConstruction } from "./automata/SubsetConstruction";
 import { Chapter } from "./automata/ui";
-import { useRunner } from "./automata/useRunner";
+import { useLinkedString, useRunner } from "./automata/useRunner";
 
 export default function NfaDetail({ language, approach }: DetailProps) {
   const query = useAutomaton(language.id, approach.id);
@@ -17,6 +17,7 @@ export default function NfaDetail({ language, approach }: DetailProps) {
   const record = query.data;
   const nfa = record?.automaton.kind === "nfa" ? (record.automaton as NfaPayload) : null;
   const sc = record?.subset_construction;
+  const link = useLinkedString(runner, nfa?.alphabet);
 
   // The subset DFA accepts exactly the NFA's language, so it can label example strings locally.
   const examples = useMemo<ExampleSet>(() => {
@@ -41,7 +42,7 @@ export default function NfaDetail({ language, approach }: DetailProps) {
   if (query.error || !record) return <ErrorState message={errorMessage(query.error)} onRetry={() => query.refetch()} />;
   if (!nfa) return <ErrorState message="This record does not contain an NFA." />;
 
-  const demo = examples.accepted.find((s) => s.length >= 3) ?? examples.accepted[0];
+  const demo = link.linked !== null ? (link.valid ? link.linked : undefined) : (examples.accepted.find((s) => s.length >= 3) ?? examples.accepted[0]);
   const construction = typeof nfa.meta?.construction === "string" ? nfa.meta.construction : null;
   const eps = Object.values(nfa.epsilon).reduce((n, list) => n + list.length, 0);
 

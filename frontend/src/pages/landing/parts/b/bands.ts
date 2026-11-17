@@ -1,6 +1,6 @@
 import { useDataset, useSummary } from "@/lib/api";
 
-const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"];
+const WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen"];
 
 /** Small counts as words in running text ("ten languages"), larger ones as numerals. */
 export const words = (n: number | null | undefined, fallback = "the"): string =>

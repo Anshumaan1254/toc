@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
+import { useSearchParams } from "react-router";
 import { useLenis } from "@/components/layout/SmoothScroll";
 import { useTracePlayer } from "@/components/graph/useTracePlayer";
 import { useClassify } from "@/lib/api";
@@ -68,18 +69,49 @@ export function useScrollTo() {
   const scroll = useCallback(
     (onArrive?: () => void) => {
       const el = ref.current;
-      if (!el) {
+      // Exactly once: Lenis skips onComplete while stopped, so a timer backs it up.
+      let arrived = false;
+      const arrive = () => {
+        if (arrived) return;
+        arrived = true;
         onArrive?.();
+      };
+      if (!el) {
+        arrive();
+        return;
+      }
+      const top = el.getBoundingClientRect().top;
+      if (top >= 0 && top <= 140) {
+        arrive();
         return;
       }
       if (lenis) {
-        lenis.scrollTo(el, { offset: -92, duration: 1.1, onComplete: () => onArrive?.() });
+        lenis.scrollTo(el, { offset: -92, duration: 1.1, onComplete: arrive });
+        window.setTimeout(arrive, 1500);
       } else {
         el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
-        if (onArrive) window.setTimeout(onArrive, reduce ? 0 : 650);
+        window.setTimeout(arrive, reduce ? 0 : 650);
       }
     },
     [lenis, reduce],
   );
   return { ref, scroll };
+}
+
+/**
+ * `?s=` carries a string over from Compare. Absent: the usual demo run. Present (empty = ε) and
+ * inside the alphabet: run it once on load. Outside the alphabet: put it in the field, do not run.
+ */
+export function useLinkedString(runner: Runner, alphabet: string[] | undefined) {
+  const [params] = useSearchParams();
+  const s = params.get("s");
+  const valid = s !== null && !!alphabet && [...s].every((c) => alphabet.includes(c));
+  const { setDraft } = runner;
+  const placed = useRef(false);
+  useEffect(() => {
+    if (placed.current || s === null || !alphabet || valid) return;
+    placed.current = true;
+    setDraft(s);
+  }, [s, alphabet, valid, setDraft]);
+  return { linked: s, valid };
 }

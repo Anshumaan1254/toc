@@ -129,8 +129,13 @@ export function sizeLine(meta: ApproachMeta, approach: Approach | undefined): st
   return states;
 }
 
-/** The API explains disagreements in plain text; tidy the ASCII dashes it uses. */
-export const tidy = (text: string): string => text.replace(/\s-\s/g, " – ").trim();
+/** The API explains disagreements in plain text; tidy its ASCII dashes and raw identifiers. */
+export const tidy = (text: string): string =>
+  text
+    .replace(/\s-\s/g, " – ")
+    .replace(/\s*\(max_states\)/g, "")
+    .replace(/P\(accept\)\s*=\s*(\d*\.?\d+)/g, (_, p: string) => `${Math.round(Number(p) * 100)}%`)
+    .trim();
 
 /** Reads `meta.state_notes` ("r2" -> "value ≡ 2 (mod 3)") from an automaton payload. */
 export function stateNotes(meta: Record<string, unknown> | undefined): Record<string, string> | undefined {

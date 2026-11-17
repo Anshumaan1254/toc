@@ -1,13 +1,14 @@
-import { useId, useMemo } from "react";
+import { useCallback, useId, useMemo } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { ChevronDown, Dices } from "lucide-react";
-import type { DfaPayload, Language } from "@/lib/types";
+import { ChevronDown, Dices, SearchCheck } from "lucide-react";
+import type { Approach, DfaPayload, Language } from "@/lib/types";
 import { runDfa, randomString } from "@/lib/automata";
 import { showString } from "@/lib/meta";
 import { Button, Panel, StringInput } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { cn } from "@/lib/utils";
 import { EXAMPLES, EXAMPLE_KIND_LABEL } from "./examples";
+import { useDisagreementFinder } from "./finder";
 
 interface ControlsProps {
   languages: Language[];
@@ -21,10 +22,12 @@ interface ControlsProps {
   truth?: DfaPayload;
   /** The string currently compared (from the link), to mark the active example. */
   current: string | null;
+  /** From /api/approaches: which learned machines are not equivalent to the ground truth. */
+  approaches?: Approach[];
   className?: string;
 }
 
-export function Controls({ languages, language, draft, onDraft, onSubmit, onLanguage, loading, truth, current, className }: ControlsProps) {
+export function Controls({ languages, language, draft, onDraft, onSubmit, onLanguage, loading, truth, current, approaches, className }: ControlsProps) {
   const selectId = useId();
   const reduce = useReducedMotion();
   const examples = useMemo(
@@ -35,6 +38,16 @@ export function Controls({ languages, language, draft, onDraft, onSubmit, onLang
       })),
     [language, truth],
   );
+
+  const run = useCallback(
+    (s: string) => {
+      onDraft(s);
+      onSubmit(s);
+    },
+    [onDraft, onSubmit],
+  );
+  const finder = useDisagreementFinder(language, approaches, current, run);
+  const searching = finder.state.status === "searching";
 
   const rollLong = () => {
     const length = 21 + Math.floor(Math.random() * 16);
@@ -137,6 +150,23 @@ export function Controls({ languages, language, draft, onDraft, onSubmit, onLang
             <Dices size={16} aria-hidden />
             Random long string
           </Button>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <button
+            type="button"
+            onClick={finder.find}
+            disabled={searching}
+            aria-busy={searching}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full text-[15px] font-medium text-ink underline decoration-line-strong underline-offset-4 transition-colors hover:decoration-ink-2 disabled:cursor-wait disabled:text-ink-2"
+          >
+            <SearchCheck size={16} aria-hidden className="shrink-0 text-ink-2" />
+            {searching ? "Looking…" : "Find a string they disagree on"}
+          </button>
+          <p role="status" className="min-w-0 text-sm text-muted">
+            {finder.state.status === "none"
+              ? `No disagreement found for ${finder.state.language}: every approach matches the ground truth on the strings tried.`
+              : ""}
+          </p>
         </div>
       </div>
     </Panel>

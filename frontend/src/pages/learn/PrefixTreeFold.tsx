@@ -1,8 +1,9 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
-import { FoldVertical, UnfoldVertical } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useWidth } from "@/components/charts/Charts";
 import { layoutGraph, toGraphModel } from "@/components/graph/layout";
+import { DimensionLine } from "@/components/ui/DimensionLine";
 import { runDfa } from "@/lib/automata";
 import type { DfaPayload } from "@/lib/types";
 
@@ -64,14 +65,25 @@ function buildTrie(samples: { string: string; label: boolean }[], alphabet: stri
  * in the state the learned DFA reaches after reading it, so the colours (one per final state) show
  * which prefixes the learner decided behave alike.
  */
-export function PrefixTreeFold({ dfa, samples, learnerName }: { dfa: DfaPayload; samples: { string: string; label: boolean }[]; learnerName: string }) {
+export function PrefixTreeFold({
+  dfa,
+  samples,
+  learnerName,
+  ptaStates,
+}: {
+  dfa: DfaPayload;
+  samples: { string: string; label: boolean }[];
+  learnerName: string;
+  /** The prefix tree's size as the API reports it (for the dimension line). */
+  ptaStates?: number | null;
+}) {
   const reduce = useReducedMotion();
   const uid = useId().replace(/:/g, "");
   const [boxRef, W] = useWidth<HTMLDivElement>();
   const viewRef = useRef<HTMLDivElement>(null);
   const inView = useInView(viewRef, { once: true, amount: 0.45 });
   const [folded, setFolded] = useState(false);
-  const [touched, setTouched] = useState(false);
+  const [replay, setReplay] = useState(0);
 
   const trie = useMemo(() => buildTrie(samples, dfa.alphabet), [samples, dfa.alphabet]);
 
@@ -136,16 +148,29 @@ export function PrefixTreeFold({ dfa, samples, learnerName }: { dfa: DfaPayload;
     return { lay, s, ox, oy, statePos, folded, members, stateR, right, ends };
   }, [W, H, trie, leaves, dfa]);
 
-  // The tree is always drawn; a moment after it is first seen it folds into the machine.
+  // The build animation: the tree is drawn first, held for 400ms once it is in view, then folds
+  // into the machine. Reduced motion shows the folded machine straight away.
   useEffect(() => {
-    if (!inView || touched) return;
+    if (!inView) return;
     if (reduce) {
       setFolded(true);
       return;
     }
-    const t = window.setTimeout(() => setFolded(true), 1700 + trie.maxDepth * 60);
+    const t = window.setTimeout(() => setFolded(true), 400);
     return () => window.clearTimeout(t);
-  }, [inView, reduce, touched, trie.maxDepth]);
+  }, [inView, reduce]);
+
+  // Replay: the dots travel back into the tree, hold, and fold again.
+  useEffect(() => {
+    if (!replay) return;
+    setFolded(false);
+    if (reduce) {
+      const t = window.setTimeout(() => setFolded(true), 900);
+      return () => window.clearTimeout(t);
+    }
+    const t = window.setTimeout(() => setFolded(true), 900 + 400);
+    return () => window.clearTimeout(t);
+  }, [replay, reduce]);
 
   const nodes = [...trie.nodes.values()];
   const dotR = nodes.length > 90 ? 2.6 : nodes.length > 45 ? 3.2 : 4;
@@ -255,7 +280,7 @@ export function PrefixTreeFold({ dfa, samples, learnerName }: { dfa: DfaPayload;
                     }
                     fill={ends ? (n.label ? "var(--accept)" : "var(--reject)") : "var(--ink-2)"}
                     fillOpacity={ends ? 1 : 0.5}
-                    stroke={n.id === "" ? "var(--lamp)" : "none"}
+                    stroke={n.id === "" ? "var(--ink)" : "none"}
                     strokeWidth={n.id === "" ? 1.6 : 0}
                   >
                     <title>{`${n.id === "" ? "ε" : n.id} lands in ${n.state}${ends ? (n.label ? " (an accepted example)" : " (a rejected example)") : ""}`}</title>
@@ -267,27 +292,27 @@ export function PrefixTreeFold({ dfa, samples, learnerName }: { dfa: DfaPayload;
           {!geometry && <div style={{ height: H }} />}
         </div>
       </div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {typeof ptaStates === "number" && (
+        <DimensionLine label={`${ptaStates} ${ptaStates === 1 ? "state" : "states"} to ${dfa.states.length}`} />
+      )}
+      <div className="space-y-2">
         <p className="text-sm text-muted" aria-live="polite">
           {folded
             ? geometry && geometry.right === geometry.ends
               ? `Every prefix now sits in the state the machine reaches after reading it. All ${geometry.ends} examples landed on the right side: mint in accepting states, coral in rejecting ones.`
               : `Every prefix now sits in the state the machine reaches after reading it.${geometry ? ` ${geometry.ends - geometry.right} of ${geometry.ends} examples landed on the wrong side.` : ""}`
-            : `Each dot is a prefix of an example, growing from ε at the amber root. Mint dots end an accepted example, coral dots a rejected one.${
+            : `Each dot is a prefix of an example, growing from ε at the root. Mint dots end an accepted example, coral dots a rejected one.${
                 trie.cut ? ` Showing the first ${trie.maxDepth} levels of ${trie.total} states.` : ""
               }`}
         </p>
-          <button
-            type="button"
-            onClick={() => {
-              setTouched(true);
-              setFolded((v) => !v);
-            }}
-            className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-line bg-panel/90 px-3 py-1.5 text-xs font-medium text-ink-2 transition-colors hover:border-line-strong hover:text-ink"
-          >
-            {folded ? <UnfoldVertical size={13} aria-hidden /> : <FoldVertical size={13} aria-hidden />}
-            {folded ? "Unfold the prefix tree" : "Fold it into the machine"}
-          </button>
+        <button
+          type="button"
+          onClick={() => setReplay((k) => k + 1)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-panel/90 px-3 py-1.5 text-xs font-medium text-ink-2 transition-colors hover:border-line-strong hover:text-ink"
+        >
+          <RotateCcw size={13} aria-hidden />
+          Replay the fold
+        </button>
       </div>
     </div>
   );

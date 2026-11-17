@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { RefreshCw } from "lucide-react";
-import { BorderBeam } from "@/components/magicui/border-beam";
 import { useLenis } from "@/components/layout/SmoothScroll";
 import { Button, Stat } from "@/components/ui/primitives";
 import { useLearnClassify } from "@/lib/api";
-import type { LearnClassifyResult } from "@/lib/types";
+import type { LearnClassifyResult, LearnResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { HowLearned, MlFit } from "./Insights";
 import { LEARNER_BY_ID } from "./LearnerPicker";
@@ -29,6 +28,25 @@ export function Reveal({ children, className, delay = 0 }: { children: ReactNode
       {children}
     </motion.div>
   );
+}
+
+/** The brief's teaching notes for tiny and trivial results, from the returned data. */
+function teachingNotes(result: LearnResult): string[] {
+  const notes: string[] = [];
+  if (result.samples < 6) {
+    notes.push(`With only ${plural(result.samples, "example")}, this is the simplest machine that fits. Add a string it gets wrong.`);
+  }
+  if (result.states === 1) {
+    const acceptsAll = result.automaton.accepting.length > 0;
+    const wrong = result.samples - result.fits_samples;
+    if (result.negatives === 0) notes.push("Every sample was accepted, so the simplest machine accepts everything.");
+    else if (result.positives === 0) notes.push("Every sample was rejected, so the simplest machine rejects everything.");
+    else
+      notes.push(
+        `One state that ${acceptsAll ? "accepts" : "rejects"} everything is the simplest guess${wrong > 0 ? `, and it gets ${plural(wrong, "example")} wrong` : ""}. Add more examples near the boundary.`,
+      );
+  }
+  return notes;
 }
 
 /**
@@ -97,6 +115,7 @@ export function ResultView({
     );
   const done = !!(run && frame && frame.runId === run.id && frame.done);
   const fitsAll = result.fits_samples === result.samples;
+  const notes = teachingNotes(result);
 
   return (
     <div className="mx-auto max-w-6xl px-6">
@@ -113,6 +132,11 @@ export function ResultView({
                 ? `, then minimized from ${plural(result.minimized_from, "state")}.`
                 : ", already minimal."}
             </p>
+            {notes.map((note) => (
+              <p key={note} className="mt-3 border-l-2 border-line-strong pl-3 text-ink-2">
+                {note}
+              </p>
+            ))}
           </div>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
@@ -130,8 +154,8 @@ export function ResultView({
       </Reveal>
 
       {stale && (
-        <div className="mt-8 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-panel/85 shadow-[inset_3px_0_0_var(--lamp)] px-4 py-3 text-sm text-ink" role="status">
-          <RefreshCw size={16} className="shrink-0 text-lamp" aria-hidden />
+        <div className="mt-8 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-panel/85 px-4 py-3 text-sm text-ink shadow-[inset_3px_0_0_var(--line-strong)]" role="status">
+          <RefreshCw size={16} className="shrink-0 text-ink-2" aria-hidden />
           <span className="min-w-0 flex-1">Your examples or learner changed since this machine was learned.</span>
           <Button size="sm" onClick={onRelearn} loading={busy}>
             Learn again
@@ -149,7 +173,6 @@ export function ResultView({
         <div className={cn("min-w-0 space-y-10 transition-opacity duration-300", busy && "pointer-events-none opacity-60")} aria-busy={busy}>
           <Reveal delay={0.1}>
             <div ref={benchRef} className="relative rounded-3xl border border-line bg-panel/85 p-5 shadow-[var(--shadow)] sm:p-6">
-              {classify.isPending && <BorderBeam size={120} duration={1.6} colorFrom="var(--lamp)" colorTo="var(--series-lr)" />}
               <TestBench
                 alphabet={result.alphabet}
                 input={input}
@@ -202,7 +225,6 @@ export function EmptyResult({ busy, count }: { busy: boolean; count: number }) {
     <div className="mx-auto max-w-6xl px-6">
       <div className="relative overflow-hidden rounded-3xl border border-dashed border-line-strong bg-panel/40">
         <div className="grid-paper absolute inset-0 opacity-70" aria-hidden />
-        {busy && !reduce && <BorderBeam size={200} duration={2.2} borderWidth={2} colorFrom="var(--lamp)" colorTo="var(--accept)" />}
         <div className="relative grid items-center gap-8 px-6 py-12 md:grid-cols-[1fr_1.2fr] md:px-12 md:py-16">
           <div className="space-y-3">
             <h2 id="result-title" className="font-display text-3xl font-semibold text-ink">

@@ -7,7 +7,7 @@ import { useLenis } from "@/components/layout/SmoothScroll";
 import { Button } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { cn } from "@/lib/utils";
-import { FAMILY_ORDER, describeApproaches, isWrong, type Slot } from "./model";
+import { FAMILY_ORDER, describeApproaches, isWrong, numberWord, type Slot } from "./model";
 
 const FAMILY_SHORT: Record<Family, string> = { truth: "Ground truth", learned: "Learned automata", ml: "ML pipelines" };
 
@@ -20,13 +20,15 @@ interface SummaryProps {
   maxTrain?: number;
   runKey: string;
   stale: boolean;
+  /** False while the answer key above is still reading the string: hold the verdicts back until it lands. */
+  revealed: boolean;
 }
 
 /**
  * The verdict of the line-up in one sentence, plus a scoreboard of every approach (agrees or
  * disagrees) that jumps to its row. The sentence is the page's live region for screen readers.
  */
-export function Summary({ result, language, slots, maxTrain, runKey, stale }: SummaryProps) {
+export function Summary({ result, language, slots, maxTrain, runKey, stale, revealed }: SummaryProps) {
   const reduce = useReducedMotion() ?? false;
   const lenis = useLenis();
   const [copied, setCopied] = useState<"idle" | "done" | "failed">("idle");
@@ -38,17 +40,24 @@ export function Summary({ result, language, slots, maxTrain, runKey, stale }: Su
   const L = language.id;
   const subject = result.length === 0 ? "ε" : "the string";
 
-  const headline =
-    wrong.length === 0 ? (
-      <>Every approach agrees with the ground truth.</>
-    ) : (
-      <>
-        <span className="text-reject">
-          {wrong.length} of {answered.length}
-        </span>{" "}
-        approaches {wrong.length === 1 ? "disagrees" : "disagree"} with the ground truth.
-      </>
-    );
+  const agree = answered.length - wrong.length;
+  const headline = !revealed ? (
+    <span className="text-ink-2">
+      {capitalize(numberWord(answered.length))} {answered.length === 1 ? "approach is" : "approaches are"} reading…
+    </span>
+  ) : wrong.length === 0 ? (
+    <>
+      {answered.length === 1 ? "It agrees" : `All ${numberWord(answered.length)} agree`}:{" "}
+      <span className={result.truth ? "text-accept" : "text-reject"}>{result.truth ? "accepted" : "rejected"}</span>.
+    </>
+  ) : (
+    <>
+      {agree === 0 ? "None agree" : `${capitalize(numberWord(agree))} ${agree === 1 ? "agrees" : "agree"}`} with the ground truth.{" "}
+      <span className="text-reject">
+        {capitalize(numberWord(wrong.length))} {wrong.length === 1 ? "does" : "do"} not.
+      </span>
+    </>
+  );
 
   const detail =
     wrong.length === 0
@@ -85,7 +94,7 @@ export function Summary({ result, language, slots, maxTrain, runKey, stale }: Su
     <section aria-labelledby="summary-title" className={cn("transition-opacity duration-300", stale && "opacity-50")}>
       <div className="flex flex-wrap items-start justify-between gap-x-10 gap-y-5">
         <motion.div
-          key={runKey}
+          key={`${runKey}-${revealed}`}
           className="min-w-0 max-w-4xl flex-1 basis-[36rem]"
           initial={reduce ? false : { opacity: 0, y: 16, filter: "blur(6px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -94,7 +103,7 @@ export function Summary({ result, language, slots, maxTrain, runKey, stale }: Su
           <h2 id="summary-title" className="max-w-4xl font-display text-[34px] font-semibold leading-[1.05] text-ink sm:text-5xl">
             {headline}
           </h2>
-          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-ink-2">
+          <p className={cn("mt-4 max-w-3xl text-lg leading-relaxed text-ink-2", !revealed && "invisible")} aria-hidden={!revealed || undefined}>
             {detail}
             {result.longer_than_training && (
               <>
@@ -126,13 +135,14 @@ export function Summary({ result, language, slots, maxTrain, runKey, stale }: Su
           <div key={family} className="min-w-0">
             <ul className={cn("grid gap-1", members.length > 4 ? "grid-cols-3 sm:grid-cols-6 lg:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]" : "grid-cols-4 lg:[grid-template-columns:repeat(var(--n),minmax(0,1fr))]")} style={{ "--n": members.length } as CSSProperties}>
               {members.map((s, i) => {
-                const bad = isWrong(s.row);
+                const bad = revealed && isWrong(s.row);
                 const missing = !s.row || !s.row.available;
+                const pending = !revealed && !missing;
                 const meta = APPROACH_BY_ID[s.meta.id];
                 const order = groups.slice(0, g).reduce((n, x) => n + x.members.length, 0) + i;
                 return (
                   <motion.li
-                    key={`${runKey}-${s.meta.id}`}
+                    key={`${runKey}-${s.meta.id}-${revealed}`}
                     className="min-w-0"
                     initial={reduce ? false : { opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -149,19 +159,21 @@ export function Summary({ result, language, slots, maxTrain, runKey, stale }: Su
                             ? "border-[color:var(--reject)] bg-reject-soft text-ink hover:bg-[color:var(--reject)]/20"
                             : "border-line-strong bg-panel/70 text-ink-2 hover:border-ink-2 hover:text-ink",
                       )}
-                      aria-label={`${meta.name}: ${missing ? "no result" : bad ? "disagrees with the ground truth" : "agrees with the ground truth"}. Jump to its row.`}
+                      aria-label={`${meta.name}: ${missing ? "no result" : pending ? "reading" : bad ? "disagrees with the ground truth" : "agrees with the ground truth"}. Jump to its row.`}
                     >
                       <span aria-hidden className="absolute inset-x-0 top-0 h-[3px]" style={{ background: meta.color }} />
                       <span className="block truncate font-mono text-[11.5px] leading-none">{meta.short}</span>
                       <span className="flex items-center justify-between">
                         {missing ? (
                           <span className="text-[11px]">n/a</span>
+                        ) : pending ? (
+                          <span aria-hidden className="h-[15px]" />
                         ) : bad ? (
                           <X size={15} strokeWidth={3} className="text-reject" aria-hidden />
                         ) : (
                           <Check size={15} strokeWidth={3} className="text-accept" aria-hidden />
                         )}
-                        {!missing && s.row?.accepted !== undefined && (
+                        {!missing && !pending && s.row?.accepted !== undefined && (
                           <span
                             aria-hidden
                             title={s.row.accepted ? "accepts" : "rejects"}

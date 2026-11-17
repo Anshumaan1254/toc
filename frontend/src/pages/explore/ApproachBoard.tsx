@@ -1,6 +1,7 @@
 import { useState, type ReactNode, type Ref } from "react";
 import { Link } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
+import { EASE_DRAW, stagger } from "@/lib/motion";
 import type { UseQueryResult } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { errorMessage, useDataset } from "@/lib/api";
@@ -9,8 +10,15 @@ import type { Approach, ApproachId, Family, Language } from "@/lib/types";
 import { ErrorState, Skeleton } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { cn } from "@/lib/utils";
-import { ApproachTile } from "./ApproachTile";
-import { FAMILY_GRID, FAMILY_IDS, FAMILY_ORDER, TILE_SPAN, orderFamily, pairOf } from "./explore-utils";
+import { ApproachRow, ROW_GRID } from "./ApproachRow";
+import { FAMILY_IDS, FAMILY_ORDER, orderFamily, pairOf } from "./explore-utils";
+
+/** The series colours each family draws with, shown beside its heading. */
+const FAMILY_SWATCHES: Record<Family, string[]> = {
+  truth: ["var(--series-truth)"],
+  learned: ["var(--series-rpni)", "var(--series-edsm)", "var(--series-lr)", "var(--series-dt)", "var(--series-rf)", "var(--series-stack)"],
+  ml: ["var(--series-lr)", "var(--series-dt)", "var(--series-rf)", "var(--series-stack)"],
+};
 
 const FAMILY_COPY: Record<Family, ReactNode> = {
   truth: (
@@ -29,8 +37,8 @@ const FAMILY_COPY: Record<Family, ReactNode> = {
   ),
   ml: (
     <>
-      Classifiers that score generic string features and answer with a probability. They have no states, so their size is counted in parameters or
-      tree nodes. The tick on each size bar marks how many transitions the minimal DFA needs for the same job.
+      Logistic regression, a decision tree, a random forest and a <Term k="stacking">stacked</Term> ensemble score generic string features and answer
+      with a probability, not a state, so their size is counted in parameters or tree nodes.
     </>
   ),
 };
@@ -56,7 +64,7 @@ function ContextBar({
   return (
     <div className="sticky top-[74px] z-30 mx-auto max-w-6xl px-4 sm:px-6">
       <div className="flex items-center gap-2 rounded-2xl border border-line bg-[color:var(--bg)]/90 py-1.5 pl-2 pr-1.5 shadow-[var(--shadow)] backdrop-blur-xl sm:gap-3 sm:pl-2.5">
-        <span className="rounded-lg bg-lamp-soft px-2 py-0.5 font-display text-lg font-semibold text-lamp">{language.id}</span>
+        <span className="rounded-lg bg-panel-2 px-2 py-0.5 font-display text-lg font-semibold text-ink">{language.id}</span>
         <div className="min-w-0 flex-1 leading-tight">
           {/* divs, not paragraphs: the global p { text-wrap: pretty } would defeat truncate */}
           <div className="truncate text-sm font-medium text-ink">{language.name}</div>
@@ -87,17 +95,19 @@ function ContextBar({
   );
 }
 
-// ------------------------------------------------------------------ loading skeleton (same grid, same heights)
+// ------------------------------------------------------------------ loading skeleton (hairline rows, same heights)
 function BoardSkeleton() {
   return (
     <div className="space-y-16" role="status" aria-label="Loading the approaches">
       {FAMILY_ORDER.map((family) => (
-        <div key={family}>
+        <div key={family} className="border-t border-line pt-6">
           <Skeleton className="h-8 w-56" />
           <Skeleton className="mt-3 h-4 w-full max-w-2xl" />
-          <div className={cn("mt-8 grid gap-4", FAMILY_GRID[family])}>
+          <div className="mt-8">
             {FAMILY_IDS[family].map((id) => (
-              <Skeleton key={id} className={cn("h-[330px] rounded-[18px]", TILE_SPAN[id])} />
+              <div key={id} className="border-b border-line py-5">
+                <Skeleton className="h-9 w-full" />
+              </div>
             ))}
           </div>
         </div>
@@ -110,26 +120,45 @@ function MeterLegend() {
   return (
     <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted" aria-hidden>
       <span className="inline-flex items-center gap-2">
-        <span className="relative h-[5px] w-10 rounded-full bg-panel-2">
+        <span className="relative h-[4px] w-10 rounded-full bg-panel-2">
           <span className="absolute inset-y-0 left-0 w-8 rounded-full bg-ink-2" />
+          <span className="absolute -bottom-[3px] -top-[3px] left-1/2 w-px bg-ink-2/60" />
         </span>
-        accuracy, ruled every 10%
+        accuracy from 0 to 100%, tick at 50%: a coin flip
       </span>
       <span className="inline-flex items-center gap-2">
-        <span className="relative h-[5px] w-10 rounded-full bg-panel-2">
-          <span className="absolute -bottom-[3px] -top-[3px] left-1/2 w-px bg-ink-2" />
-        </span>
-        50%, a coin flip on the balanced long strings
-      </span>
-      <span className="inline-flex items-center gap-2">
-        <svg width="34" height="10" viewBox="0 0 34 10">
-          <circle cx="4.5" cy="5" r="3.3" fill="var(--ink-2)" stroke="var(--ink-2)" strokeWidth="1.2" />
-          <circle cx="13.5" cy="5" r="3.3" fill="var(--ink-2)" stroke="var(--ink-2)" strokeWidth="1.2" />
-          <circle cx="22.5" cy="5" r="3.3" fill="none" stroke="var(--ink-2)" strokeWidth="1.2" />
-          <circle cx="31.5" cy="5" r="3.3" fill="none" stroke="var(--ink-2)" strokeWidth="1.2" />
+        <svg width="22" height="14" viewBox="0 0 22 14">
+          <circle cx="8" cy="7" r="5.5" fill="none" stroke="var(--ink-2)" strokeWidth="1.3" />
+          <circle cx="8" cy="7" r="5.5" fill="none" stroke="var(--ink)" strokeWidth="1.3" />
         </svg>
-        one circle per state, hollow beyond the minimal DFA
+        matches the ground truth exactly
       </span>
+      <span className="inline-flex items-center gap-2">
+        <svg width="22" height="14" viewBox="0 0 22 14">
+          <circle cx="8" cy="7" r="5.5" fill="none" stroke="var(--ink-2)" strokeWidth="1.3" />
+          <circle cx="14" cy="7" r="5.5" fill="none" stroke="var(--ink)" strokeWidth="1.3" strokeDasharray="2.4 1.8" />
+        </svg>
+        differs on at least one string
+      </span>
+    </div>
+  );
+}
+
+/** Column heads for the schedule (lg), with the shared 0 to 100 axis over the bars. */
+function ScheduleHead() {
+  return (
+    <div aria-hidden className={cn(ROW_GRID, "t-annotation hidden border-b border-line pb-2 lg:grid")}>
+      <span className="col-start-1 row-start-1 pl-[17px]">approach</span>
+      <span className="col-start-2 row-start-1 grid grid-cols-[6.6rem_minmax(0,1fr)_3.4rem] gap-x-2.5">
+        <span>accuracy</span>
+        <span className="flex justify-between">
+          <span>0</span>
+          <span>50</span>
+          <span>100%</span>
+        </span>
+      </span>
+      <span className="col-start-3 row-start-1">size</span>
+      <span className="col-start-4 row-start-1">exact language</span>
     </div>
   );
 }
@@ -175,7 +204,7 @@ export function ApproachBoard({
 
       <div className="mx-auto max-w-6xl px-6">
         <header className="max-w-3xl pb-10 pt-14">
-          <h2 id="approaches-heading" ref={headingRef} tabIndex={-1} className="font-display text-4xl font-semibold text-ink outline-none md:text-5xl">
+          <h2 id="approaches-heading" ref={headingRef} tabIndex={-1} className="t-h2 text-ink outline-none">
             Choose an approach for {language.id}
           </h2>
           <p className="mt-4 text-lg text-ink-2">
@@ -193,51 +222,57 @@ export function ApproachBoard({
         ) : query.isError ? (
           <ErrorState message={errorMessage(query.error)} onRetry={() => void query.refetch()} />
         ) : data ? (
-          <div aria-busy={stale} className={cn("space-y-20 transition-opacity duration-300", stale && "opacity-55")}>
+          <div aria-busy={stale} className={cn("space-y-16 transition-opacity duration-300", stale && "opacity-55")}>
             {FAMILY_ORDER.map((family) => {
               const items = orderFamily(data, family);
               if (items.length === 0) return null;
               return (
                 <div key={family} id={`family-${family}`} className="scroll-mt-40">
-                  <div className="mb-7 grid grid-cols-1 gap-x-10 gap-y-3 border-t border-line pt-6 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
-                    <h3 tabIndex={-1} className="font-display text-[28px] font-semibold leading-tight text-ink outline-none">
-                      {FAMILIES[family].name}
-                      <span className="ml-2 align-middle font-mono text-sm font-normal text-muted">{items.length}</span>
+                  <div className="mb-6 grid grid-cols-1 gap-x-10 gap-y-3 border-t border-line pt-6 md:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]">
+                    <h3 tabIndex={-1} className="t-h3 flex items-center gap-3 text-[1.75rem] text-ink outline-none">
+                      <span className="flex -space-x-1" aria-hidden>
+                        {FAMILY_SWATCHES[family].map((c) => (
+                          <span key={c} className="h-2.5 w-2.5 rounded-full ring-2 ring-[color:var(--bg)]" style={{ background: c }} />
+                        ))}
+                      </span>
+                      <span>
+                        {FAMILIES[family].name}
+                        <span className="ml-2 align-middle font-mono text-sm font-normal text-muted">{items.length}</span>
+                      </span>
                     </h3>
                     <p className="max-w-3xl text-[15px] leading-relaxed text-ink-2">{FAMILY_COPY[family]}</p>
                   </div>
-                  <div className={cn("grid gap-4", FAMILY_GRID[family])}>
+                  <ScheduleHead />
+                  <ul>
                     {items.map((a, i) => {
                       const partnerId = pairOf(a.id);
                       return (
-                        <motion.div
+                        <motion.li
                           key={a.id}
-                          className={cn("row-span-4 grid min-w-0 grid-rows-subgrid gap-y-0", TILE_SPAN[a.id])}
-                          initial={reduce ? false : { opacity: 0, y: 28 }}
+                          initial={reduce ? false : { opacity: 0, y: 8 }}
                           whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true, amount: 0.12 }}
-                          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: (i % 4) * 0.07 }}
+                          viewport={{ once: true, amount: 0.4 }}
+                          transition={{ duration: 0.5, ease: EASE_DRAW, delay: stagger(i, items.length) }}
                         >
-                          <ApproachTile
+                          <ApproachRow
                             approach={a}
                             language={statsLanguage}
                             linkLanguageId={language.id}
                             longRange={longRange}
-                            partner={a.family === "ml" && partnerId ? data.find((b) => b.id === partnerId) : undefined}
-                            paired={hovered !== null && pairOf(hovered) === a.id}
+                            paired={hovered !== null && partnerId !== null && hovered === partnerId}
                             onHoverChange={setHovered}
                           />
-                        </motion.div>
+                        </motion.li>
                       );
                     })}
-                  </div>
+                  </ul>
                 </div>
               );
             })}
           </div>
         ) : null}
 
-        <div className="mt-24 grid grid-cols-1 items-center gap-6 rounded-[18px] border border-line bg-panel/60 p-6 md:grid-cols-[minmax(0,1fr)_auto] md:p-8">
+        <div className="mt-24 grid grid-cols-1 items-center gap-6 border-t border-line pt-8 md:grid-cols-[minmax(0,1fr)_auto]">
           <div>
             <h3 className="font-display text-2xl font-semibold text-ink">Not sure which one to trust?</h3>
             <p className="mt-2 max-w-2xl text-ink-2">

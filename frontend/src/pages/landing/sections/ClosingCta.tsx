@@ -1,79 +1,69 @@
-import { Link } from "react-router";
-import { GitCompareArrows, PencilRuler } from "lucide-react";
-import ClickSpark from "@/components/reactbits/ClickSpark";
-import Magnet from "@/components/reactbits/Magnet";
-import StarBorder from "@/components/reactbits/StarBorder";
-import { useLanguages } from "@/lib/api";
-import { PIPELINES } from "@/lib/meta";
-import { useTheme, useThemeColors } from "@/lib/theme";
+import { useState, type ReactNode } from "react";
+import { Link, useNavigate } from "react-router";
+import { StringInput } from "@/components/ui/primitives";
+import { useSummary } from "@/lib/api";
 import { words } from "../parts/b/bands";
-import { LampRays } from "../parts/b/backgrounds";
 import { Reveal } from "../parts/b/ui";
 
+/** The language the closing string is run against on the compare page. */
+const CLOSING_LANGUAGE = "L6";
+
 /**
- * The way out of the story and into the tools: amber light falls on one closing line, a
- * primary path to the explorer (StarBorder + Magnet + ClickSpark) and two quieter paths.
+ * The page's last interaction: type a string and send it to every approach at once on the
+ * compare page. Drafting paper only, no light effects; the three tools follow as plain links.
  */
 export function ClosingCta() {
-  const c = useThemeColors();
-  const { theme } = useTheme();
-  const languages = useLanguages();
-  const count = languages.data?.length;
+  const summary = useSummary();
+  const navigate = useNavigate();
+  const [value, setValue] = useState("");
+  const count = summary.data?.approaches.length;
+  const countWords = count ? words(count) : "all";
+  const run = () => navigate(`/compare?lang=${CLOSING_LANGUAGE}&s=${encodeURIComponent(value)}`);
   return (
     <section aria-labelledby="cta-title" className="relative isolate overflow-hidden border-t border-line">
-      <LampRays />
       <div
         aria-hidden
         className="grid-paper pointer-events-none absolute inset-0 opacity-80 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_45%,black_20%,transparent_75%)]"
       />
-      <div className="relative mx-auto flex min-h-[90svh] max-w-6xl flex-col items-center justify-center px-6 py-32 text-center">
+      <div className="relative mx-auto flex min-h-[90svh] max-w-6xl flex-col items-center justify-center px-4 py-28 text-center sm:px-6 md:py-32">
         <Reveal>
           <h2 id="cta-title" className="mx-auto max-w-4xl font-display text-[clamp(2.75rem,8vw,6.75rem)] font-semibold leading-[0.95] tracking-[-0.02em] text-ink">
-            Now run the machines yourself.
+            Now try to fool one.
           </h2>
           <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-ink-2 md:text-xl">
-            Pick any of the {count ? `${words(count)} ` : ""}languages, type a string and watch the ground-truth DFA, the NFA, the extracted automata and all{" "}
-            {words(PIPELINES.length)} models decide, one symbol at a time.
+            Pick a language, type a string, and watch {count ? `${countWords} ` : "every one of the "}approaches answer.
           </p>
         </Reveal>
-        <Reveal delay={0.15} className="mt-12 flex flex-col items-center gap-10">
-          <div className="inline-block">
-            <ClickSpark sparkColor={[c.lamp, c.accept, c.ink]} sparkCount={12} sparkRadius={46} sparkSize={12} duration={520} shape="line" glow={0.6}>
-              <Magnet padding={70} magnetStrength={3.2} maxOffset={14} wrapperClassName="inline-block">
-                <StarBorder
-                  as={Link}
-                  to="/explore"
-                  radius={999}
-                  thickness={1.5}
-                  duration={4.5}
-                  stars={2}
-                  glow={0.9}
-                  sparkle
-                  theme={theme}
-                  color={c.lamp}
-                  trailColor={c.lamp}
-                  backgroundColor="var(--panel)"
-                  textColor="var(--ink)"
-                  borderColor="var(--line-strong)"
-                  className="px-9 py-4 font-display text-xl font-semibold md:px-11 md:py-5 md:text-2xl"
-                >
-                  Explore the models
-                </StarBorder>
-              </Magnet>
-            </ClickSpark>
-          </div>
-          <nav aria-label="Other ways in" className="flex flex-col items-center gap-4 sm:flex-row sm:gap-10">
-            <Link to="/compare" className="group inline-flex items-center gap-2.5 rounded-full px-1 text-[17px] text-ink-2 transition-colors hover:text-ink">
-              <GitCompareArrows size={18} className="text-lamp transition-transform group-hover:-rotate-6" aria-hidden />
-              <span className="border-b border-transparent group-hover:border-[color:var(--lamp)]">Compare every approach on one string</span>
-            </Link>
-            <Link to="/learn" className="group inline-flex items-center gap-2.5 rounded-full px-1 text-[17px] text-ink-2 transition-colors hover:text-ink">
-              <PencilRuler size={18} className="text-lamp transition-transform group-hover:-rotate-6" aria-hidden />
-              <span className="border-b border-transparent group-hover:border-[color:var(--lamp)]">Teach a machine your own language</span>
-            </Link>
+        <Reveal delay={0.12} className="mt-12 w-full max-w-xl text-left">
+          <StringInput
+            value={value}
+            onChange={setValue}
+            onSubmit={run}
+            alphabet={["0", "1"]}
+            placeholder="Type a string of 0 and 1"
+            submitLabel={count ? `Run all ${countWords}` : "Run them all"}
+            label={`A string for ${CLOSING_LANGUAGE}`}
+          />
+        </Reveal>
+        <Reveal delay={0.2}>
+          <nav aria-label="Other ways in" className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-10">
+            <TextLink to="/explore">Explore the languages</TextLink>
+            <TextLink to="/compare">Compare all {countWords}</TextLink>
+            <TextLink to="/learn">Teach a machine yourself</TextLink>
           </nav>
         </Reveal>
       </div>
     </section>
+  );
+}
+
+function TextLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className="text-[17px] text-ink-2 underline decoration-[color:var(--line-strong)] decoration-1 underline-offset-[6px] transition-colors hover:text-ink hover:decoration-[color:var(--ink-2)]"
+    >
+      {children}
+    </Link>
   );
 }

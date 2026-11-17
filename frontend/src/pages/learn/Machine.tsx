@@ -1,10 +1,9 @@
 import { useEffect, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronLeft, ChevronRight, Pause, Play, RotateCcw, SkipForward } from "lucide-react";
 import { useTracePlayer } from "@/components/graph/useTracePlayer";
 import { Tape } from "@/components/tape/Tape";
 import { VerdictStamp } from "@/components/ui/primitives";
-import { BorderBeam } from "@/components/magicui/border-beam";
 import { showString } from "@/lib/meta";
 import type { LearnResult } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -124,7 +123,6 @@ export function MachinePanel({
   pair: [string, string] | null;
   busy: boolean;
 }) {
-  const reduce = useReducedMotion();
   const dfa = result.automaton;
   const live = run && frame && frame.runId === run.id ? frame : null;
   const dimmed = pair ? dfa.states.filter((s) => s !== pair[0] && s !== pair[1]) : [];
@@ -136,7 +134,6 @@ export function MachinePanel({
   return (
     <div className="relative overflow-hidden rounded-3xl border border-line bg-panel/80 shadow-[var(--shadow)]">
       <div className="grid-paper absolute inset-0" aria-hidden />
-      {busy && !reduce && <BorderBeam size={180} duration={2.4} borderWidth={2} colorFrom="var(--lamp)" colorTo="var(--accept)" />}
 
       <div className="relative px-4 pb-2 pt-4 sm:px-5">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
@@ -166,7 +163,7 @@ export function MachinePanel({
               className="absolute inset-0 grid place-items-center text-sm font-medium text-ink"
               role="status"
             >
-              <span className="rounded-full border border-line bg-panel px-4 py-2 shadow-[var(--shadow)]">Learning a new machine…</span>
+              <span className="t-annotation rounded-full border border-line bg-panel px-4 py-2 text-ink shadow-[var(--shadow)]">Learning…</span>
             </motion.p>
           )}
         </AnimatePresence>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight } from "lucide-react";
+import { DimensionLine } from "@/components/ui/DimensionLine";
 import { AutomatonGraph } from "@/components/graph/AutomatonGraph";
 import { layoutGraph, toGraphModel, type Layout } from "@/components/graph/layout";
 import { useTracePlayer } from "@/components/graph/useTracePlayer";
@@ -181,18 +181,12 @@ export function MinimizationView({ minimization, after }: { minimization: Minimi
           The minimized DFA was produced by <Term k="hopcroft">Hopcroft's algorithm</Term>. Below are the rounds of{" "}
           <Term k="moore">Moore's algorithm</Term>, its simpler cousin, which reaches the same groups one string length at a time.
         </p>
-        <div className="flex items-center gap-4" aria-label={`${minimization.states_before} states before, ${minimization.states_after} after`}>
-          <div className="text-right">
-            <div className="font-display text-5xl font-semibold leading-none text-ink tabular-nums">{minimization.states_before}</div>
-            <div className="mt-1 text-xs text-muted">states before</div>
+        <div className="w-[min(100%,15rem)] space-y-2" role="img" aria-label={`${minimization.states_before} states before, ${minimization.states_after} after`}>
+          <div className="flex items-baseline justify-between gap-6">
+            <span className="t-stat text-ink">{minimization.states_before}</span>
+            <span className={cn("t-stat transition-colors duration-500", merged ? "text-lamp" : "text-ink")}>{minimization.states_after}</span>
           </div>
-          <ArrowRight className="text-muted" size={22} aria-hidden />
-          <div>
-            <div className={cn("font-display text-5xl font-semibold leading-none tabular-nums transition-colors duration-500", merged ? "text-lamp" : "text-ink")}>
-              {minimization.states_after}
-            </div>
-            <div className="mt-1 text-xs text-muted">after</div>
-          </div>
+          <DimensionLine label={`${minimization.states_before} states to ${minimization.states_after}`} />
         </div>
       </div>
 

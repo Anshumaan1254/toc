@@ -1,6 +1,7 @@
 import { useRef, type ReactNode } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 import { Info } from "lucide-react";
+import { DimensionLine } from "@/components/ui/DimensionLine";
 import { Stat } from "@/components/ui/primitives";
 import { Term } from "@/components/ui/Term";
 import { pct } from "@/lib/meta";
@@ -60,11 +61,11 @@ export function HowLearned({ result, samples }: { result: LearnResult; samples: 
 
       {passive && pta !== null && (
         <div className="space-y-3">
-          <div className="flex items-baseline gap-2 font-display">
-            <Ticker value={result.states} from={pta} duration={1.6} className="text-4xl font-semibold text-ink" />
-            <span className="text-ink-2">{result.states === 1 ? "state left" : "states left"} of {pta}</span>
-          </div>
-          {samples.length > 0 && <PrefixTreeFold dfa={result.automaton} samples={samples} learnerName={meta.name} />}
+          {samples.length > 0 ? (
+            <PrefixTreeFold dfa={result.automaton} samples={samples} learnerName={meta.name} ptaStates={pta} />
+          ) : (
+            <DimensionLine label={`${plural(pta, "state")} to ${result.states}`} />
+          )}
         </div>
       )}
 
@@ -94,8 +95,8 @@ export function HowLearned({ result, samples }: { result: LearnResult; samples: 
       {result.warnings.length > 0 && (
         <ul className="space-y-2">
           {result.warnings.map((w) => (
-            <li key={w} className="flex gap-3 rounded-xl border border-line bg-panel/85 shadow-[inset_3px_0_0_var(--lamp)] px-4 py-3 text-sm text-ink">
-              <Info size={17} className="mt-0.5 shrink-0 text-lamp" aria-hidden />
+            <li key={w} className="flex gap-3 rounded-xl border border-line bg-panel/85 px-4 py-3 text-sm text-ink shadow-[inset_3px_0_0_var(--line-strong)]">
+              <Info size={17} className="mt-0.5 shrink-0 text-ink-2" aria-hidden />
               <span>{w}</span>
             </li>
           ))}

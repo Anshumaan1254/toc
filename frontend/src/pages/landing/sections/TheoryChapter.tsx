@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from "motion/rea
 import { useQueryClient } from "@tanstack/react-query";
 import { Term } from "@/components/ui/Term";
 import { api, useAutomaton } from "@/lib/api";
+import { EASE_DRAW, EASE_EXIT } from "@/lib/motion";
 import type { ApproachId } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useLiveGate, useMediaQuery, useRefreshOnResize } from "../parts/a/hooks";
@@ -26,6 +27,11 @@ interface Step {
   body: ReactNode;
   Stage: ComponentType<StageProps>;
   label: string;
+  /**
+   * Height (px) the inline drawing reserves on small screens: the tallest frame of its loop,
+   * measured at 390px wide. Reserving it keeps the page from growing while you scroll.
+   */
+  compactHeight: number;
 }
 
 function Code({ children }: { children: ReactNode }) {
@@ -75,6 +81,7 @@ export function TheoryChapter() {
   const steps: Step[] = [
     {
       id: "dfa",
+      compactHeight: 290,
       label: "q0",
       title: "A DFA reads one symbol at a time",
       Stage: DfaStage,
@@ -93,6 +100,7 @@ export function TheoryChapter() {
     },
     {
       id: "nfa",
+      compactHeight: 410,
       label: "q1",
       title: "An NFA follows every path at once",
       Stage: NfaStage,
@@ -109,6 +117,7 @@ export function TheoryChapter() {
     },
     {
       id: "subset",
+      compactHeight: 644,
       label: "q2",
       title: "Subset construction turns sets into states",
       Stage: SubsetStage,
@@ -129,6 +138,7 @@ export function TheoryChapter() {
     },
     {
       id: "minimize",
+      compactHeight: 672,
       label: "q3",
       title: "Minimization merges what no string can tell apart",
       Stage: MinimizeStage,
@@ -150,6 +160,7 @@ export function TheoryChapter() {
     },
     {
       id: "equivalence",
+      compactHeight: 500,
       label: "q4",
       title: "Equivalence: run two machines in lockstep",
       Stage: ProductStage,
@@ -170,6 +181,7 @@ export function TheoryChapter() {
     },
     {
       id: "myhill-nerode",
+      compactHeight: 560,
       label: "q5",
       title: "A suffix that keeps two states apart",
       Stage: SuffixStage,
@@ -195,6 +207,7 @@ export function TheoryChapter() {
     },
     {
       id: "limits",
+      compactHeight: 384,
       label: "q6",
       title: "The limit of a finite memory",
       Stage: PumpStage,
@@ -280,7 +293,7 @@ export function TheoryChapter() {
                     {s.body}
                   </div>
                 </div>
-                {!wide && <InlineStage Stage={s.Stage} title={s.title} />}
+                {!wide && <InlineStage Stage={s.Stage} title={s.title} height={s.compactHeight} />}
               </li>
             ))}
           </ol>
@@ -323,14 +336,14 @@ function StageFrame({ title, stepKey, Stage }: { title: string; stepKey: string;
     <div ref={ref} role="group" aria-label={`Drawing for: ${title}`} className="relative h-full">
       <CropMarks />
       <div className="grid-paper relative h-full overflow-hidden rounded-lg border border-line bg-panel/50 p-6 backdrop-blur-[2px]">
-        <AnimatePresence mode="wait" initial={false}>
+        {/* Cross-fade: both layers stack, so the sheet is never empty between steps. */}
+        <AnimatePresence mode="sync" initial={false}>
           <motion.div
             key={stepKey}
-            className="h-full"
-            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 14, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -10, filter: "blur(6px)" }}
-            transition={{ duration: 0.32, ease: [0.2, 0.8, 0.2, 1] }}
+            className="absolute inset-6"
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.3, ease: EASE_DRAW } }}
+            exit={{ opacity: 0, transition: { duration: 0.16, ease: EASE_EXIT } }}
           >
             <Stage live={live} />
           </motion.div>
@@ -340,16 +353,28 @@ function StageFrame({ title, stepKey, Stage }: { title: string; stepKey: string;
   );
 }
 
-/** Small screens: the drawing sits under its text and only runs while on screen. */
-function InlineStage({ Stage, title }: { Stage: ComponentType<StageProps>; title: string }) {
+/**
+ * Small screens: the drawing sits under its text and only runs while on screen. The box
+ * reserves the drawing's measured height from the start (a dashed state stands in until the
+ * drawing mounts), so nothing below it moves while you scroll.
+ */
+function InlineStage({ Stage, title, height }: { Stage: ComponentType<StageProps>; title: string; height: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const near = useInView(ref, { margin: "300px 0px 300px 0px", once: true });
   const live = useLiveGate(ref);
   return (
     <div ref={ref} role="group" aria-label={`Drawing for: ${title}`} className="relative mt-8">
       <CropMarks size="h-3 w-3" />
-      <div className="grid-paper flex min-h-[24rem] flex-col rounded-lg border border-line bg-panel/50 p-4">
-        {near ? <Stage live={live} compact /> : null}
+      <div className="grid-paper flex flex-col rounded-lg border border-line bg-panel/50 p-4" style={{ minHeight: Math.max(384, height) }}>
+        {near ? (
+          <div className="flex min-h-0 flex-1 flex-col [&>*]:flex-1">
+            <Stage live={live} compact />
+          </div>
+        ) : (
+          <div aria-hidden className="grid flex-1 place-items-center">
+            <span className="h-14 w-14 rounded-full border border-dashed border-line-strong" />
+          </div>
+        )}
       </div>
     </div>
   );

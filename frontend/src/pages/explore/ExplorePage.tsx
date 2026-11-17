@@ -85,17 +85,17 @@ export default function ExplorePage() {
     <>
       <ExploreHero />
 
-      <section id="languages" aria-labelledby="languages-heading" className="mx-auto max-w-6xl scroll-mt-24 px-6 pb-20 pt-12 md:pt-16">
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+      <section id="languages" aria-labelledby="languages-heading" className="mx-auto max-w-6xl scroll-mt-24 px-6 pb-20 pt-7 md:pt-8">
+        <div className="mb-5 grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           <div>
-            <h2 id="languages-heading" tabIndex={-1} className="font-display text-4xl font-semibold text-ink outline-none md:text-5xl">
+            <h2 id="languages-heading" tabIndex={-1} className="font-display text-xl font-semibold text-ink outline-none">
               Choose a language
             </h2>
-            <p className="mt-3 max-w-3xl text-lg text-ink-2">
+            <p className="mt-1 max-w-3xl text-[15px] text-ink-2">
               {list.length > 0 ? `${list.length} ` : ""}
               <Term k="regular">regular languages</Term>
               {alphabets.length > 0 ? ` over the alphabets ${alphabets.map(setNotation).join(" and ")}` : ""}. Each is defined by a hand-built{" "}
-              <Term k="dfa">DFA</Term>. Pick one and watch it read sample strings.
+              <Term k="dfa">DFA</Term>, drawn on the sheet reading sample strings.
             </p>
           </div>
           <p className="hidden items-center gap-1.5 text-sm text-muted md:flex">

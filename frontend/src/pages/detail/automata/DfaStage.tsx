@@ -8,8 +8,8 @@ import { duration } from "@/lib/meta";
 import type { DfaPayload, Family } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { trapStates } from "./model";
-import { BlueprintStage, NotationLegend, PlayerBar, StatePill, StringChip, stateRadius, useGraphBox, useMediaQuery } from "./ui";
-import { isDfaTrace, type Runner } from "./useRunner";
+import { BlueprintStage, KeyHints, NotationLegend, PlayerBar, StageSheet, StatePill, StringChip, useElementWidth, useMediaQuery, usePlayerKeys, useStageGeometry } from "./ui";
+import { isDfaTrace, useScrollTo, type Runner } from "./useRunner";
 
 export interface ExampleSet {
   accepted: string[];
@@ -152,18 +152,36 @@ export function RunPath({ states, symbols, index, onSeek }: { states: string[]; 
   );
 }
 
-/** Starts one example run when the stage first scrolls into view, so the machine is already moving. */
+/**
+ * Starts one example run when the stage first scrolls into view, so the machine is already moving.
+ * Never replaces a string the visitor (or a ?s= link) already put in the field.
+ */
 export function useDemoRun(runner: Runner, demo: string | undefined) {
   const ref = useRef<HTMLDivElement>(null);
   const seen = useInView(ref, { once: true, amount: 0.3 });
   const autoRan = useRef(false);
-  const { result, pending, run } = runner;
+  const { result, pending, run, draft } = runner;
   useEffect(() => {
     if (!seen || autoRan.current || demo === undefined) return;
     autoRan.current = true;
-    if (!result && !pending) run(demo);
-  }, [seen, demo, result, pending, run]);
+    if (!result && !pending && draft === "") run(demo);
+  }, [seen, demo, result, pending, run, draft]);
   return ref;
+}
+
+/**
+ * On a phone the console sits under the graph and the tape, so a run started from it would play
+ * off-screen: bring the stage into view first, then run.
+ */
+export function useStageRun(runner: Runner, narrow: boolean) {
+  const sheet = useScrollTo();
+  const { run, setDraft } = runner;
+  const go = (s: string) => {
+    if (!narrow) return run(s);
+    setDraft(s);
+    sheet.scroll(() => run(s));
+  };
+  return { ref: sheet.ref, go };
 }
 
 export function DfaStage({
@@ -174,6 +192,7 @@ export function DfaStage({
   family,
   isTruth,
   demo,
+  note,
 }: {
   dfa: DfaPayload;
   notes: Record<string, string>;
@@ -182,14 +201,17 @@ export function DfaStage({
   family: Family;
   isTruth: boolean;
   demo?: string;
+  /** A remark under the legend (e.g. why an unconverged L* machine is so big). */
+  note?: ReactNode;
 }) {
   const narrow = useMediaQuery("(max-width: 639px)");
   const wide = dfa.states.length > 12;
-  const rankdir = narrow && dfa.states.length > 3 ? "TB" : "LR";
-  const box = useGraphBox(dfa, rankdir);
-  const radius = useMemo(() => stateRadius(dfa), [dfa]);
+  const maxHeight = narrow ? 420 : wide ? 560 : 440;
+  const col = useElementWidth<HTMLDivElement>();
+  const { layout, rankdir, radius, pan } = useStageGeometry(dfa, narrow, col.width, maxHeight);
   const traps = useMemo(() => trapStates(dfa), [dfa]);
   const ref = useDemoRun(runner, demo);
+  const stage = useStageRun(runner, narrow);
 
   const r = runner.result;
   const trace = runner.live && r && isDfaTrace(r.trace) ? r.trace : null;
@@ -202,30 +224,47 @@ export function DfaStage({
   const status: TapeStatus = !trace ? "idle" : runner.done ? (r!.accepted ? "accepted" : "rejected") : "running";
   const states = useMemo(() => (trace ? [trace.start, ...trace.steps.map((s) => s.to ?? "–")] : []), [trace]);
   const symbols = useMemo(() => (trace ? trace.steps.map((s) => s.symbol) : []), [trace]);
-  const note = current ? notes[current] : undefined;
+  const stateNote = current ? notes[current] : undefined;
+  const visited = useMemo(
+    () => (trace ? trace.steps.slice(0, Math.max(0, idx)).flatMap((s) => (s.from !== null && s.to !== null ? [{ from: s.from, to: s.to }] : [])) : undefined),
+    [trace, idx],
+  );
+  usePlayerKeys(ref, runner.player, !!trace);
 
   return (
     <div ref={ref}>
+      <div ref={stage.ref} className="scroll-mt-24">
       <BlueprintStage>
         <div className={cn("grid", !wide && "lg:grid-cols-[minmax(0,1fr)_minmax(320px,368px)] lg:grid-rows-[minmax(0,1fr)_auto]")}>
           {/* graph */}
-          <div className={cn("relative flex min-h-[300px] min-w-0 flex-col px-3 pb-4 pt-4 sm:px-6 sm:pt-5", !wide && "lg:col-start-1 lg:row-start-1")}>
+          <div ref={col.ref} className={cn("relative flex min-h-[300px] min-w-0 flex-col px-3 pb-4 pt-4 sm:px-6 sm:pt-5", !wide && "lg:col-start-1 lg:row-start-1")}>
             <NotationLegend hasTrap={traps.size > 0} className="relative z-10 max-w-[calc(100%-7rem)]" />
-            <div className="mx-auto my-auto w-full py-3" style={{ maxWidth: Math.max(300, box.width * 1.55) }}>
-              <AutomatonGraph
-                automaton={dfa}
-                active={current ? [current] : []}
-                activeEdge={edge}
-                tokenKey={`${r?.string ?? ""}:${idx}`}
-                verdict={verdict}
-                notes={notes}
-                rankdir={rankdir}
-                radius={radius}
-                maxHeight={narrow ? 420 : wide ? 560 : 440}
-                zoomable
-                ariaLabel={`State diagram of the ${dfa.states.length}-state DFA. Start state ${dfa.start}; accepting ${dfa.accepting.join(", ") || "none"}.${current ? ` The read head is in ${current}.` : ""}`}
-              />
-            </div>
+            {(note || pan) && (
+              <p className="t-caption relative z-10 mt-2 max-w-[calc(100%-7rem)] text-muted">
+                {note}
+                {note && pan ? " " : null}
+                {pan && "The sheet scrolls sideways and follows the read head."}
+              </p>
+            )}
+            <StageSheet layout={layout} pan={pan} focus={current ? [current] : [dfa.start]}>
+              {(sheetHeight) => (
+                <AutomatonGraph
+                  automaton={dfa}
+                  active={current ? [current] : []}
+                  activeEdge={edge}
+                  visited={visited}
+                  tokenKey={`${r?.string ?? ""}:${idx}`}
+                  verdict={verdict}
+                  notes={notes}
+                  rankdir={rankdir}
+                  radius={radius}
+                  maxHeight={sheetHeight ?? maxHeight}
+                  zoomable={!pan}
+                  animateIn={dfa.states.length <= 24}
+                  ariaLabel={`State diagram of the ${dfa.states.length}-state DFA. Start state ${dfa.start}; accepting ${dfa.accepting.join(", ") || "none"}.${current ? ` The read head is in ${current}.` : ""}`}
+                />
+              )}
+            </StageSheet>
           </div>
 
           {/* tape + player */}
@@ -246,12 +285,12 @@ export function DfaStage({
                     <span className="font-mono text-ink">
                       δ({step.from}, <span className="text-lamp">{step.symbol}</span>) = {step.to}
                     </span>
-                    {note && <span className="text-muted">: {note}</span>}
+                    {stateNote && <span className="text-muted">: {stateNote}</span>}
                   </>
                 ) : (
                   <>
                     Start in <span className="font-mono text-ink">{trace.start}</span>
-                    {note && <span className="text-muted">: {note}</span>}
+                    {stateNote && <span className="text-muted">: {stateNote}</span>}
                   </>
                 )}
               </p>
@@ -262,6 +301,7 @@ export function DfaStage({
               )}
             </div>
             <PlayerBar player={runner.player} total={trace ? runner.steps : 0} stepLabel="Symbol" name="run" className="mt-3" />
+            <KeyHints className="mt-2" />
           </div>
 
           <RunConsole
@@ -278,14 +318,14 @@ export function DfaStage({
               <StringInput
                 value={runner.draft}
                 onChange={runner.setDraft}
-                onSubmit={() => runner.run(runner.draft)}
+                onSubmit={() => stage.go(runner.draft)}
                 alphabet={dfa.alphabet}
                 submitLabel="Run the string"
                 loading={runner.pending}
                 label="Your string"
               />
             }
-            examples={<ExampleRows examples={examples} onPick={runner.run} current={trace ? r!.string : undefined} wrongLabel="Machine is wrong" />}
+            examples={<ExampleRows examples={examples} onPick={stage.go} current={trace ? r!.string : undefined} wrongLabel="Machine is wrong" />}
             status={
               <RunStatus runner={runner} family={family} isTruth={isTruth}>
                 {trace && states.length > 1 && <RunPath states={states} symbols={symbols} index={idx} onSeek={runner.player.seek} />}
@@ -294,6 +334,7 @@ export function DfaStage({
           />
         </div>
       </BlueprintStage>
+      </div>
     </div>
   );
 }

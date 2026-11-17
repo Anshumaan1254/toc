@@ -55,13 +55,14 @@ export function ExtractionMatrix({ summary }: { summary: Summary }) {
                         <Link
                           to={`/explore/${l.id}/${a}`}
                           className={cn(
-                            "flex h-10 items-center justify-center gap-1.5 rounded-lg border font-mono text-[13px] transition-colors hover:border-[color:var(--lamp)]",
-                            exact ? "border-transparent bg-accept-soft text-accept" : "border-transparent bg-reject-soft text-reject",
+                            "flex h-10 items-center justify-center gap-1.5 rounded-lg border font-mono text-[13px] transition-colors hover:border-[color:var(--ink-2)] hover:bg-panel-2/60",
+                            exact ? "border-line text-ink-2" : "border-line text-ink",
                             stopped && "border-dashed !border-[color:var(--line-strong)]",
                           )}
                           aria-label={`${l.id}, ${a}: ${r.states} states, ${exact ? "equal to the ground truth" : "differs from the ground truth"}, ${stopped ? "stopped at the state budget" : "converged"}`}
                           title={`${r.states} states${stopped ? ", stopped at the state budget" : ""}`}
                         >
+                          <RingGlyph exact={exact} />
                           <span aria-hidden>{exact ? "✓" : "≠"}</span>
                           <span className="tabular">{r.states}</span>
                         </Link>
@@ -76,14 +77,14 @@ export function ExtractionMatrix({ summary }: { summary: Summary }) {
       </div>
       <ul className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-ink-2" aria-label="Key">
         <li className="flex items-center gap-2">
-          <span className="grid h-5 w-8 place-items-center rounded bg-accept-soft font-mono text-accept" aria-hidden>
-            ✓
+          <span className="flex h-5 w-12 items-center justify-center gap-1 rounded border border-line font-mono text-ink-2" aria-hidden>
+            <RingGlyph exact />✓
           </span>
           equal to the ground truth
         </li>
         <li className="flex items-center gap-2">
-          <span className="grid h-5 w-8 place-items-center rounded bg-reject-soft font-mono text-reject" aria-hidden>
-            ≠
+          <span className="flex h-5 w-12 items-center justify-center gap-1 rounded border border-line font-mono text-ink" aria-hidden>
+            <RingGlyph exact={false} />≠
           </span>
           differs from it
         </li>
@@ -94,5 +95,22 @@ export function ExtractionMatrix({ summary }: { summary: Summary }) {
         <li className="text-muted">the number is the DFA&apos;s state count</li>
       </ul>
     </div>
+  );
+}
+
+/**
+ * Two state rings laid on top of each other: registered in ink when the extracted DFA is the
+ * truth, the tracing-paper ring slipped off in amber when it is not (the light-table idea).
+ */
+function RingGlyph({ exact }: { exact: boolean }) {
+  return (
+    <svg viewBox="0 0 18 14" width={18} height={14} aria-hidden className="shrink-0">
+      <circle cx={7} cy={7} r={5} fill="none" stroke="var(--ink-2)" strokeWidth={1.25} />
+      {exact ? (
+        <circle cx={7} cy={7} r={3} fill="none" stroke="var(--ink-2)" strokeWidth={1.25} />
+      ) : (
+        <circle cx={11} cy={7} r={5} fill="none" stroke="var(--lamp)" strokeWidth={1.25} strokeDasharray="2.2 1.6" />
+      )}
+    </svg>
   );
 }

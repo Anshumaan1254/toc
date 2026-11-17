@@ -38,7 +38,7 @@ export function MetricsPanel({ metrics, dfa, isLstar, onRun }: { metrics: Automa
         className={cn("border-l-[3px] pl-6", metrics.equivalent_to_truth ? "border-[color:var(--accept)]" : "border-[color:var(--reject)]")}
       >
         <p className={cn("font-display text-[40px] font-semibold leading-[1.02] md:text-5xl", metrics.equivalent_to_truth ? "text-accept" : "text-reject")}>
-          {metrics.equivalent_to_truth ? "Exactly the right machine." : "Not the right machine."}
+          {metrics.equivalent_to_truth ? "Exactly the right machine." : metrics.test.accuracy >= 0.99995 ? "One string away from the right machine." : "Not the right machine."}
         </p>
         {metrics.equivalent_to_truth ? (
           <p className="mt-4 text-ink-2">

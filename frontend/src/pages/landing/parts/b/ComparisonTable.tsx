@@ -102,7 +102,7 @@ export function ComparisonTable({ rows, languages }: { rows: ComparisonOverallRo
                       </span>
                     </th>
                     <td className="tabular px-3 py-3 text-right text-ink">{(r.test_accuracy * 100).toFixed(1)}%</td>
-                    <td className={cn("tabular px-3 py-3 text-right", perfect ? "text-accept" : "text-ink")}>{(r.long_accuracy * 100).toFixed(1)}%</td>
+                    <td className={cn("tabular px-3 py-3 text-right", perfect ? "font-semibold text-ink" : "text-ink-2")}>{(r.long_accuracy * 100).toFixed(1)}%</td>
                     <td className="px-3 py-3 text-ink">
                       <span className="tabular">{fmtSize(r.mean_size)}</span> <span className="text-xs text-muted">{r.size_unit}</span>
                       {bar(logShare(r.mean_size, sizeLo, sizeHi), k)}
@@ -122,7 +122,7 @@ export function ComparisonTable({ rows, languages }: { rows: ComparisonOverallRo
                             <span
                               key={j}
                               className="h-2.5 w-1.5 rounded-[2px]"
-                              style={{ background: j < r.exact_languages ? "var(--accept)" : "color-mix(in srgb, var(--ink-2) 18%, transparent)" }}
+                              style={{ background: j < r.exact_languages ? "var(--ink)" : "color-mix(in srgb, var(--ink-2) 18%, transparent)" }}
                             />
                           ))}
                         </span>
